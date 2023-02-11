@@ -3,6 +3,7 @@ server = function (input, output, session) {
   options(shiny.maxRequestSize=30*1024^2) #maximum size for uploading
   list_reavalues=reactiveValues(
     table=NULL, #initialization
+    type_table=NULL,
     table_all=NULL,
     col_names=NULL #columns name
     
@@ -24,6 +25,8 @@ server = function (input, output, session) {
           list_reavalues$col_names=names(personnalFile)
           list_reavalues$table_all=personnalFile
           list_reavalues$table=data.frame(list_reavalues$table_all)
+          list_reavalues$type_table=data.frame(variable = colnames(list_reavalues$table), type = sapply(list_reavalues$table, class))
+          rownames(list_reavalues$type_table) = NULL
           output$input_varschoice=renderUI({
             selectInput("input_varschoice",label="Choisissez les variables",choices=cbind("#Toutes",list_reavalues$col_names),selected = "#Toutes",multiple = TRUE)
           })
@@ -63,6 +66,8 @@ server = function (input, output, session) {
   observeEvent(input$input_varschoice, {
     if(!"#Toutes" %in% input$input_varschoice){
       list_reavalues$table=as.data.frame(list_reavalues$table_all[input$input_varschoice])
+      list_reavalues$type_table=data.frame(variable = colnames(list_reavalues$table), type = sapply(list_reavalues$table, class))
+      rownames(list_reavalues$type_table) = NULL
       output$input_varchoice=renderUI({
         selectInput("input_varchoice",label="Choisissez une variable",choices=input$input_varschoice,selected = input$input_varschoice[1])
       })
@@ -75,6 +80,10 @@ server = function (input, output, session) {
     }
     else{
       list_reavalues$table=data.frame(list_reavalues$table_all)
+      list_reavalues$type_table=data.frame(variable = colnames(list_reavalues$table), type = sapply(list_reavalues$table, class))
+      rownames(list_reavalues$type_table) = NULL
+
+
     }
   },ignoreNULL = TRUE,ignoreInit = TRUE)
   
@@ -102,6 +111,9 @@ server = function (input, output, session) {
   
   
   output$output_table = renderDataTable({
-    if(!is.null(list_reavalues$table)) DT::datatable(list_reavalues$table,options = list(scrollX=TRUE,scrollY = "500px"))
+    if(!is.null(list_reavalues$table)) DT::datatable(list_reavalues$table,options = list(scrollX=TRUE,scrollY = "200px"))
+  })
+  output$output_type_table = renderDataTable({
+    if(!is.null(list_reavalues$type_table)) DT::datatable(list_reavalues$type_table,options = list(scrollX=TRUE,scrollY = "200px"))
   })
 }

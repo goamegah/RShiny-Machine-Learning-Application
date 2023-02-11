@@ -47,12 +47,15 @@ ui = dashboardPage(
     
   ),
   dashboardBody(
+    includeCSS("./www/style.css"),
     includeScript("./www/script.js"),
     tabBox(
       title="Tableau de Bord",
       id="tabox_exp",
       width=12,
-      tabPanel("Dataset",dataTableOutput("output_table"),
+      tabPanel("Dataset",
+               fluidRow(column(12,div(class="output_tables",dataTableOutput("output_table")))),
+               fluidRow(column(12,div(class="output_tables",dataTableOutput("output_type_table")))),
                fluidRow(
                  column(12,
                         uiOutput("input_varschoice")
