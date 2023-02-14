@@ -1,4 +1,4 @@
-# app.R or runApp.R
+# JaGo.R or runApp.R
 source("global.R")
 source("ui.R")
 source("server.R")
