@@ -18,7 +18,8 @@ ui = dashboardPage(
                      conditionalPanel(condition = "input.input_format == 'csv'",
                                       radioButtons("input_fileSep",
                                                    label = "Séparateur",
-                                                   c("point-virgule" = ";", "virgule" = ",", "espace" = " ", "tabulation" = "\t", "autre" = "autre")
+                                                   choices=c("point-virgule" = ";", "virgule" = ",", "espace" = " ", "tabulation" = "\t", "autre" = "autre"),
+                                                   selected = ","
                                       ),
                                       conditionalPanel(condition = "input.input_fileSep == 'autre'",
                                                        textInput("input_fileSepOther", label = "Séparateur")
@@ -72,6 +73,11 @@ ui = dashboardPage(
                         uiOutput("input_valid_type")
                  )
                  
+               ),
+               fluidRow(
+                 column(12,
+                        uiOutput("input_process")
+                 )
                )
                
       ),
@@ -98,6 +104,12 @@ ui = dashboardPage(
                                 actionButton("input_valid_exp",label="Valider les options")
                                 
                ),
+               fluidRow(
+                 column(12,
+                        uiOutput("viz_input")
+
+                 )
+               )
       ),
       tabPanel("Apprentissage de Modèles",
                "Tab Apprentissage de modèles"

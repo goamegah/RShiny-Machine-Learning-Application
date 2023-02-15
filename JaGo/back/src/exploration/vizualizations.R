@@ -1,0 +1,109 @@
+statistiques=function(df_col){
+  col_name=colnames(df_col)[1]
+  vec_col=df_col[,1]
+  return(tibble(
+    Nom=col_name,
+    Minimum = min(vec_col),
+    "Quantile 25%"=quantile(vec_col,probs = .25),
+    "Quantile 50%"=quantile(vec_col,probs = .5),
+    "Quantile 75%"=quantile(vec_col,probs = .75),
+    Maximum = max(vec_col),
+    Moyenne = mean(vec_col),
+    Médiane = median(vec_col),
+    "Écart-type" = sd(vec_col),
+    Variance = var(vec_col)
+  ))
+}
+
+#------------------------------------------------------------------discreet quantitative part
+create_freq_table_discreet = function(df_col) {
+  table = table(df_col)
+  table_data = as.data.frame(table)
+  colnames(table_data) = c("Valeur", "Effectif")
+  table_data$Fréquence = round(table_data$Effectif / sum(table_data$Effectif), 3)
+  table_data = table_data[order(table_data$Valeur),]
+  return(table_data)
+}
+
+
+create_bar_plot_discreet = function(df_col) {
+  freq_table = create_freq_table_discreet(df_col)
+  barplot(freq_table$Effectif, names.arg = freq_table$Valeur, xlab = "Catégories", ylab = "Effectif")
+}
+
+create_ecdf_plot_discreet = function(df_col) {
+  col_name=colnames(df_col)[1]
+  df_col=df_col[,1]
+  plot(ecdf(df_col),main="Fonction de répartition empirique", xlab = col_name, ylab = "Fréquence cumulée")
+}
+
+#-------------------------------------------------------------------
+
+
+#------------------------------------------------------------------continous quantitative part
+create_freq_table_continous = function(df_col, nbins = 10) {
+  df_col=df_col[,1]
+  breaks = seq(min(df_col), max(df_col), length.out = nbins + 1)
+  table_data = cut(df_col, breaks, include.lowest = TRUE, right = FALSE)
+  table_data = as.data.frame(table(table_data))
+  colnames(table_data) = c("Intervalle", "Effectif")
+  table_data$frequence = round(table_data$Effectif / sum(table_data$Effectif) , 3)
+  colnames(table_data)[3]="Fréquence"
+  return(table_data)
+}
+
+create_histogram_continous = function(df_col, nbins = 10, ylab = "Fréquence") {
+  col_name=colnames(df_col)[1]
+  df_col=df_col[,1]
+  breaks = seq(min(df_col), max(df_col), length.out = nbins + 1)
+  hist_data = hist(df_col, breaks = breaks, main = paste("Histogram de", col_name), xlab = col_name, ylab = ylab)
+  return(hist_data)
+}
+
+
+create_ecdf_plot_continous = function(df_col, ylab = "Fréquences Cumulées") {
+  xlab=colnames(df_col)[1]
+  df_col=df_col[,1]
+  ecdf_data = ecdf(df_col)
+  plot(ecdf_data, main = paste("Courbe des Fréquences Cumulées de", xlab), xlab = xlab, ylab = ylab)
+  abline(h = 0, col = "gray")
+}
+
+#-------------------------------------------------------------------
+
+
+#------------------------------------------------------------------- qualitative part
+tableau_effectifs_freq_qualitative = function(df_col) {
+  table_df = table(df_col)
+  table_df = as.data.frame(table_df)
+  colnames(table_df) = c(colnames(df_col)[1], "Effectif")
+  table_df$Fréquence = table_df$Effectif / sum(table_df$Effectif)
+  return(table_df)
+}
+
+diag_barres_qualitative = function(df_col) {
+  count_df = as.data.frame(table(df_col))
+  return(
+    ggplot(count_df, aes(x = as.factor(count_df[,1]), y = count_df[,2])) +
+      geom_bar(stat="identity",width = 0.8) +
+      ggtitle("Diagramme en barres") +
+      xlab(colnames(df_col)[1]) + ylab("Fréquence")
+  )
+}
+
+diag_circulaire_qualitative = function(df_col) {
+  count_df = as.data.frame(table(df_col))
+  return(
+    ggplot(count_df, aes(x = "", y = count_df[,2], fill = count_df[,1],label = paste(count_df[, 1], "\n", round(count_df[, 2] / sum(count_df[, 2]) * 100, 2), "%", sep = ""))) +
+      geom_bar(width = 0.8, stat = "identity") +
+      geom_text(position = position_stack(vjust = 0.5), color = "white", size = 4) +
+      ggtitle("Diagramme circulaire") +
+      scale_fill_brewer(palette = "Set1") +
+      coord_polar("y", start = 0) +
+      theme(legend.position = "bottom")+
+      xlab(NULL) + ylab(NULL) +
+      guides(fill = guide_legend(title = "Catégories"))
+  )
+}
+
+#-------------------------------------------------------------------

@@ -1,0 +1,63 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+The [R plugin](https://www.jetbrains.com/help/pycharm/r-plugin-support.html) for IntelliJ-based IDEs provides
+handy capabilities to work with the [R Markdown](https://www.jetbrains.com/help/pycharm/r-markdown.html) files.
+To [add](https://www.jetbrains.com/help/pycharm/r-markdown.html#add-code-chunk) a new R chunk,
+position the caret at any line or the code chunk, then click "+".
+
+The code chunk appears:
+```{r}
+
+get_categories = function(df){
+  return(sapply(df, function(x) {
+    if (is.numeric(x) || is.integer(x)) {
+      if (length(unique(x)) > 11) {
+        "quantitative continue"
+      } else {
+        "quantitative discrète"
+      }
+    } else if (is.character(x)) {
+      "qualitative nominale"
+    } else if (is.logical(x)) {
+      "qualitative ordinale"
+    } else if (is.factor(x)) {
+      if (is.ordered(x)) {
+        "qualitative ordinale"
+      } else {
+        "qualitative nominale"
+      }
+    } else {
+      "Inconnu"
+    }
+  }))
+}
+df=data.frame(x=c(1,2,3),y=c(4,5,6))
+
+
+```
+
+Type any R code in the chunk, for example:
+```{r}
+eyes = factor(c("Bleu", "Marron", "Marron", "Vert", "Marron"),
+              levels = c("Marron", "Vert"),
+              ordered = TRUE)
+levels(eyes)
+
+```
+
+Now, click the **Run** button on the chunk toolbar to [execute](https://www.jetbrains.com/help/pycharm/r-markdown.html#run-r-code) the chunk code. The result should be placed under the chunk.
+Click the **Knit and Open Document** to build and preview an output.
+```{r}
+df1=data.frame(x=c(1,5,5),variable=c("a","b","c"))
+df2=df1
+df2["x"]=0
+df1[df1["variable"]=="a",][1]
+
+```
+```{r}
+df__=df1[1]
+print(typeof(df__))
+```
