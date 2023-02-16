@@ -93,22 +93,39 @@ diag_barres_qualitative = function(df_col) {
 
 diag_circulaire_qualitative = function(df_col) {
   count_df = as.data.frame(table(df_col))
-  return(
-    ggplot(count_df, aes(x = "", y = count_df[,2], fill = count_df[,1],label = paste(count_df[, 1], "\n", round(count_df[, 2] / sum(count_df[, 2]) * 100, 2), "%", sep = ""))) +
-      geom_bar(width = 0.8, stat = "identity") +
-      geom_text(position = position_stack(vjust = 0.5), color = "white", size = 4) +
-      ggtitle("Diagramme circulaire") +
-      scale_fill_brewer(palette = "Set1") +
-      coord_polar("y", start = 0) +
-      theme(legend.position = "bottom")+
-      xlab(NULL) + ylab(NULL) +
-      guides(fill = guide_legend(title = "Catégories"))
-  )
+  if (length(count_df[, 1]) < 7){
+    label=paste(count_df[, 1], "\n", round(count_df[, 2] / sum(count_df[, 2]) * 100, 2), "%", sep = "")
+    return(
+      ggplot(count_df, aes(x = "", y = count_df[,2], fill = count_df[,1],label = label )) +
+        geom_bar(width = 0.8, stat = "identity") +
+        geom_text(position = position_stack(vjust = 0.5), color = "white", size = 4) +
+        ggtitle("Diagramme circulaire") +
+        scale_fill_brewer(palette = "Set1") +
+        coord_polar("y", start = 0) +
+        theme(legend.position = "bottom")+
+        xlab(NULL) + ylab(NULL) +
+        guides(fill = guide_legend(title = "Catégories"))
+    )
+  } else {
+    return(
+      ggplot(count_df, aes(x = "", y = count_df[,2], fill = count_df[,1])) +
+        geom_bar(width = 0.8, stat = "identity") +
+        ggtitle("Diagramme circulaire") +
+        scale_fill_brewer(palette = "Set1") +
+        coord_polar("y", start = 0) +
+        theme(legend.position = "bottom")+
+        xlab(NULL) + ylab(NULL) +
+        guides(fill = guide_legend(title = "Catégories"))
+    )
+
+
+  }
+
 }
 
 #------------------------------------------------------------------- 2 variables
 
-two_var_contingency_table = function(df_cols,type_cols,nbins=10) {
+two_var_contingency_table = function(df_cols,type_cols,nbins=10,with_freq=FALSE) {
   # Convert variables to categorical if they are quantitative
   col_names=colnames(df_cols)
   var1=col_names[1]
@@ -123,12 +140,24 @@ two_var_contingency_table = function(df_cols,type_cols,nbins=10) {
     breaks = seq(min(df_cols[var2]), max(df_cols[var2]), length.out = nbins + 1)
     df_cols[[var2]] = cut(df_cols[[var2]], breaks = breaks,include.lowest = TRUE, right = FALSE)
   }
-  # Create contingency table
-  ct = table(df_cols[[var1]], df_cols[[var2]])
-  # Compute frequencies or percentages if requested
-  freq = prop.table(ct)
-  result = cbind(ct, freq)
-  print(result)
-  return(result)
+  ct=table(df_cols[[var1]], df_cols[[var2]])
+  if (! with_freq){
+    # Create contingency table
+    return(cbind(ct))
+  }else{
+    # Compute frequencies
+    return(cbind(prop.table(ct)))
+  }
+}
 
+
+two_var_boxplot_qual_var_cond <- function(df_cols, type_cols,nbins=10){
+  #hypothesis: var2:quantitative
+  var1 <- colnames(df_cols)[1]
+  var2 <- colnames(df_cols)[2]
+  if(type_cols[1] == "quantitative continue" || type_cols[1] == "quantitative discrète"){
+    breaks = seq(min(df_cols[var2]), max(df_cols[var2]), length.out = nbins + 1)
+    df_cols[[var1]] <- cut(df_cols[[var1]], breaks = breaks,include.lowest = TRUE, right = FALSE)
+  }
+  boxplot(df_cols[[var2]]~df_cols[[var1]])
 }

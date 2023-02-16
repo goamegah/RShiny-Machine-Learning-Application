@@ -289,15 +289,27 @@ server = function (input, output, session) {
     if (input$input_exp_type == "Bivariée" && length(input$input_bi_select_var) == 2){
       df_cols = list_reavalues$table[input$input_bi_select_var]
       viz_type = input$input_bi_select_viz
-      print(viz_type)
-      if (viz_type == "Tableau de Contingence"){
-        print("dldl")
-        type_col1=list_reavalues$col_categories[match(input$input_bi_select_var[1], names(list_reavalues$col_categories))]
-        type_col2=list_reavalues$col_categories[match(input$input_bi_select_var[2], names(list_reavalues$col_categories))]
+      type_col1=list_reavalues$col_categories[match(input$input_bi_select_var[1], names(list_reavalues$col_categories))]
+      type_col2=list_reavalues$col_categories[match(input$input_bi_select_var[2], names(list_reavalues$col_categories))]
+      type_cols=c(type_col1,type_col2)
+      if (viz_type == "Tableau de Contingence en Effectif"){
+        print(viz_type)
         table=two_var_contingency_table(df_cols,type_cols = c(type_col1,type_col2))
         output$viz_input = renderUI({
           renderTable(table,rownames = TRUE,colnames = TRUE)
         })
+      } else if (viz_type == "Tableau de Contingence en Fréquence"){
+        print(viz_type)
+        table=two_var_contingency_table(df_cols,type_cols = type_cols,with_freq=TRUE)
+        output$viz_input = renderUI({
+          renderTable(table,rownames = TRUE,colnames = TRUE)
+        })
+      } else if (viz_type == "Boite à Moustaches"){
+        #Y\X --> Y:col2 and X:col1
+        output$viz_input = renderUI({
+          renderPlot(two_var_boxplot_qual_var_cond(df_cols,type_cols = type_cols))
+        })
+
       }
 
     }

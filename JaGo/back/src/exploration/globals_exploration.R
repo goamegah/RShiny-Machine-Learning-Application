@@ -10,7 +10,7 @@ get_vizualizations=function(cat){
   } else if (cat == "quantitative discrète") {
     return(c(c("Statistiques"),visualization_types$quantitative_discreet))
   } else if (cat == "qualitative nominale" || cat == "qualitative ordinale") {
-    return(c(c("Statistiques"),visualization_types$qualitative))
+    return(visualization_types$qualitative)
   } else{
     print("A problem occur!")
   }
@@ -21,12 +21,41 @@ get_vizualizations=function(cat){
 
 
 
-visualization_types_bi = list(
+visualization_types_bi = function(cat){
+  if (cat =="quantitative continue" || cat =="quantitative discrète"){
+    return("quantitative")
+  }
+  if (cat == "qualitative nominale" || cat =="qualitative ordinale" ){
+    return("qualitative")
+  } else{
+    print(paste("A problem occur from visualization_types_bi:",cat))
+  }
 
-)
+
+}
 
 
 get_vizualizations_bi=function(cats){
-  return(c("Tableau de Contingence"))
+  viz_global=c("Tableau de Contingence en Effectif","Tableau de Contingence en Fréquence")
+  catgen1=visualization_types_bi(cats[1])
+  catgen2=visualization_types_bi(cats[2])
+  if (catgen1 == "quantitative" && catgen2 == "quantitative"){
+    return(c(viz_global,c("Boite à Moustaches")))
+  }
+  if (catgen1 == "qualitative" && catgen2 == "qualitative"){
+    return(viz_global)
+
+  }
+  if (catgen1 == "quantitative" && catgen2 == "qualitative"){
+    return(viz_global)
+
+  }
+  if (catgen1 == "qualitative" && catgen2 == "quantitative"){
+    return(c(viz_global,c("Boite à Moustaches")))
+
+  }
+  else{
+    print(paste("A problem occur from get_vizualizations_bi:",cats))
+  }
 }
 
