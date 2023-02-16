@@ -106,4 +106,29 @@ diag_circulaire_qualitative = function(df_col) {
   )
 }
 
-#-------------------------------------------------------------------
+#------------------------------------------------------------------- 2 variables
+
+two_var_contingency_table = function(df_cols,type_cols,nbins=10) {
+  # Convert variables to categorical if they are quantitative
+  col_names=colnames(df_cols)
+  var1=col_names[1]
+  var2=col_names[2]
+  if (type_cols[1]=="quantitative continue" || type_cols[1]=="quantitative discrète") {
+    df_cols[[var1]]=as.numeric(df_cols[[var1]])
+    breaks = seq(min(df_cols[var1]), max(df_cols[var1]), length.out = nbins + 1)
+    df_cols[[var1]] = cut(df_cols[[var1]], breaks = breaks,include.lowest = TRUE, right = FALSE)
+  }
+  if (type_cols[2]=="quantitative continue" || type_cols[2]=="quantitative discrète") {
+    df_cols[[var2]]=as.numeric(df_cols[[var2]])
+    breaks = seq(min(df_cols[var2]), max(df_cols[var2]), length.out = nbins + 1)
+    df_cols[[var2]] = cut(df_cols[[var2]], breaks = breaks,include.lowest = TRUE, right = FALSE)
+  }
+  # Create contingency table
+  ct = table(df_cols[[var1]], df_cols[[var2]])
+  # Compute frequencies or percentages if requested
+  freq = prop.table(ct)
+  result = cbind(ct, freq)
+  print(result)
+  return(result)
+
+}

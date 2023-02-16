@@ -88,21 +88,24 @@ ui = dashboardPage(
                  )
                ),
                
-               conditionalPanel(condition="input.input_exp_type == 'Univarié'",
+               conditionalPanel(condition="input.input_exp_type == 'Univariée'",
                                 fluidRow(
                                   column(3,uiOutput("input_uni_select_var")),
                                   column(3,uiOutput("input_uni_select_viz"))
                                 ),
-                                actionButton("input_valid_exp",label="Valider les options")
-                                
+
                ),
-               conditionalPanel(condition="input.input_exp_type == 'Bivarié'",
+               conditionalPanel(condition="input.input_exp_type == 'Bivariée'",
                                 fluidRow(
                                   column(3,uiOutput("input_bi_select_var")),
                                   column(3,uiOutput("input_bi_select_viz"))
                                 ),
-                                actionButton("input_valid_exp",label="Valider les options")
-                                
+
+               ),
+               fluidRow(
+                 column(12,
+                        actionButton("input_valid_exp",label="Valider les options")
+                 )
                ),
                fluidRow(
                  column(12,

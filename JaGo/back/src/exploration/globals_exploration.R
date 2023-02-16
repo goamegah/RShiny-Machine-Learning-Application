@@ -16,7 +16,17 @@ get_vizualizations=function(cat){
   }
 
 }
-get_vizualization=function(cat,index_viz){
-    return(get_vizualizations(cat)[index_viz])
+
+
+
+
+
+visualization_types_bi = list(
+
+)
+
+
+get_vizualizations_bi=function(cats){
+  return(c("Tableau de Contingence"))
 }
 

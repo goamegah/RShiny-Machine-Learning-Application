@@ -44,7 +44,7 @@ server = function (input, output, session) {
             selectInput("input_varchoice",label="Choisissez une variable",choices=col_names,selected = col_names[1])
           })
           output$input_type_varchoice=renderUI({
-            selectInput("input_type_varchoice",label="Choisissez la catégorie de la variable",choices=c("quantitative discrète","quantitative continue","qualitative ordinale","qualitative nominale"))
+            selectInput("input_type_varchoice",label="Choisissez la catégorie de la variable",choices=c("quantitative discrète","quantitative continue","qualitative ordinale","qualitative nominale"),selected="quantitative discrète")
           })
           output$input_valid_type=renderUI({
             actionButton("input_valid_type",label="Valider la catégorie de la variable")
@@ -58,8 +58,8 @@ server = function (input, output, session) {
           output$input_exp_type=renderUI({
             selectInput("input_exp_type",
                         label="Choisissez le type d'exploration",
-                        choices=c("Univarié","Bivarié"),
-                        selected = "Univarié"
+                        choices=c("Univariée","Bivariée"),
+                        selected = "Univariée"
             )
           })
           output$input_uni_select_viz=renderUI({
@@ -108,7 +108,7 @@ server = function (input, output, session) {
         selectInput("input_varchoice",label="Choisissez une variable",choices=col_names,selected = col_names[1])
       })
       output$input_uni_select_var=renderUI({
-        selectInput("input_uni_select_var",label="Selectionner votre variable",choices=col_names)
+        selectInput("input_uni_select_var",label="Selectionner votre variable",choices=col_names,selected = col_names[1])
       })
       output$input_bi_select_var=renderUI({
         selectizeInput("input_bi_select_var",label="Selectionner vos deux variables (x resp y)",choices=col_names,multiple=TRUE,options = list(maxItems = 2),selected =col_names[1])
@@ -124,32 +124,83 @@ server = function (input, output, session) {
     list_reavalues$type_table=data.frame(variable = colnames(list_reavalues$table), type = sapply(list_reavalues$table, function(x){get_type_columns(x)}),
                                            category=list_reavalues$col_categories)
     if (! identical(input$input_exp_type,NULL)){
-      print(input$input_exp_type)
-      if (input$input_exp_type == "Univarié"){
+      if (input$input_exp_type == "Univariée"){
         if (col_select == input$input_uni_select_var){
           choices=get_vizualizations(col_category)
-          selected=get_vizualization(col_category,1)
+          selected=choices[1]
           output$input_uni_select_viz=renderUI({
             selectInput("input_uni_select_viz",label="Selectionner votre visualisation",choices=choices,selected=selected)
           })
         }
+      } else if (input$input_exp_type == "Bivariée"){
+          if (col_select %in% input$input_bi_select_var && length(input$input_bi_select_var) == 2){
+            other_col <- setdiff(input$input_bi_select_var, col_select)
+            type_col_select=get_type_col_by_name(list_reavalues$type_table,col_select)
+            type_col_other=get_type_col_by_name(list_reavalues$type_table,other_col)
+            choices=get_vizualizations_bi(c(type_col_select,type_col_other))
+            selected=choices[1]
+            output$input_bi_select_viz=renderUI({
+              selectInput("input_bi_select_viz",label="Selectionner votre visualisation",choices=choices,selected=selected)
+            })
+
+          }
+
       }
     }
 
   },ignoreNULL = TRUE,ignoreInit = TRUE)
 
-
-
   observeEvent(input$input_uni_select_var, {
-    if (input$input_exp_type == "Univarié"){
-      type_col=get_type_col_by_name(list_reavalues$type_table,input$input_uni_select_var)
-      choices=get_vizualizations(type_col)
-      selected=choices[1]
-      output$input_uni_select_viz=renderUI({
-        selectInput("input_uni_select_viz",label="Selectionner votre visualisation",choices=choices,selected=selected)
-      })
+    if (input$input_exp_type == "Univariée"){
+      if (length(input$input_uni_select_var) == 1){
+        type_col=get_type_col_by_name(list_reavalues$type_table,input$input_uni_select_var)
+        choices=get_vizualizations(type_col)
+        selected=choices[1]
+        output$input_uni_select_viz=renderUI({
+          selectInput("input_uni_select_viz",label="Selectionner votre visualisation",choices=choices,selected=selected)
+        })
+      }
     }
   },ignoreNULL = TRUE,ignoreInit = TRUE)
+
+
+  observeEvent(input$input_bi_select_var, {
+    if (input$input_exp_type == "Bivariée"){
+      if (length(input$input_bi_select_var)==2){
+        col1=input$input_bi_select_var[1]
+        col2=input$input_bi_select_var[2]
+        type_col1=get_type_col_by_name(list_reavalues$type_table,col1)
+        type_col2=get_type_col_by_name(list_reavalues$type_table,col2)
+        choices=get_vizualizations_bi(c(type_col1,type_col2))
+        selected=choices[1]
+        output$input_bi_select_viz=renderUI({
+          selectInput("input_bi_select_viz",label="Selectionner votre visualisation",choices=choices,selected=selected)
+        })
+      } else {
+        output$input_bi_select_viz=renderUI({
+          selectInput("input_bi_select_viz",label="Selectionner votre visualisation",choices=NULL)
+        })
+
+      }
+    }
+  },ignoreNULL = TRUE,ignoreInit = TRUE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   observeEvent(input$input_process, {
@@ -164,24 +215,11 @@ server = function (input, output, session) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
   observeEvent(input$input_valid_exp,{
-    if (input$input_exp_type == "Univarié") {
+    if (input$input_exp_type == "Univariée") {
       df_col = list_reavalues$table[input$input_uni_select_var]
       viz_type = input$input_uni_select_viz
       print(viz_type)
-      print(input$input_uni_select_var)
       if (viz_type == "Statistiques"){
         output$viz_input = renderUI({
           renderTable(statistiques(df_col))
@@ -248,7 +286,21 @@ server = function (input, output, session) {
         })
       }
     }
+    if (input$input_exp_type == "Bivariée" && length(input$input_bi_select_var) == 2){
+      df_cols = list_reavalues$table[input$input_bi_select_var]
+      viz_type = input$input_bi_select_viz
+      print(viz_type)
+      if (viz_type == "Tableau de Contingence"){
+        print("dldl")
+        type_col1=list_reavalues$col_categories[match(input$input_bi_select_var[1], names(list_reavalues$col_categories))]
+        type_col2=list_reavalues$col_categories[match(input$input_bi_select_var[2], names(list_reavalues$col_categories))]
+        table=two_var_contingency_table(df_cols,type_cols = c(type_col1,type_col2))
+        output$viz_input = renderUI({
+          renderTable(table,rownames = TRUE,colnames = TRUE)
+        })
+      }
 
+    }
 
 
   },ignoreNULL = TRUE,ignoreInit = TRUE)

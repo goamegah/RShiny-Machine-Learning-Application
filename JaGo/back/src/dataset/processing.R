@@ -26,7 +26,7 @@ process <- function(df, col_categories) {
       df[[i]] <- as.factor(as.character(df[[i]]))
       df[[i]] <- factor(df[[i]], ordered = TRUE)
     } else {
-      # Unknown category, skip the column
+      print("Unknown category, skip the column")
       next
     }
   }

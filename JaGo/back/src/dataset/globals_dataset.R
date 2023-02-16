@@ -3,11 +3,14 @@ number_click_process=0
 
 get_categories = function(df){
   return(sapply(df, function(x) {
-    if (is.numeric(x) || is.integer(x)) {
-      if (length(unique(x)) > 11) {
-        "quantitative continue"
-      } else {
+    if (is.integer(x)){
+      "quantitative discrète"
+    }
+    if (is.numeric(x)) {
+      if (sum(x-floor(x)==0)/length(x)>.99) {
         "quantitative discrète"
+      } else {
+        "quantitative continue"
       }
     } else if (is.character(x)) {
       "qualitative nominale"
