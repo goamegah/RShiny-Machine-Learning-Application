@@ -1,0 +1,29 @@
+TODO:
+Bonus:
+Faire le graphe des inputs
+1. Dataset
+nombre de catégories/ présence d'outliers ? / normalisation ? / dummification ?
+
+
+2. Analyse exploratoire
+BONUS: transformation des "plots standard" en "ggplot".
+
+3. Machine Learning
+
+- Faire classification multi-classes
+
+- Classification Binaire: 
+(*) intégration courbe ROC, AUC.
+(*) déséquilibre des classes ?:
+https://www.kaggle.com/rafjaa/resampling-strategies-for-imbalanced-datasets
+
+
+BONUS Global:
+Mécanisme de vérification de la cohérence des entrées utilisateurs.
+
+
+
+Une fois interface fini:
+Faire une étude complète d'un dataset fixé:
+(b) Entraı̂nez vos modèles sur vos données et faites leur évaluation.
+(d) Identifiez les features les plus importants.
