@@ -58,6 +58,8 @@ df1[df1["variable"]=="a",][1]
 
 ```
 ```{r}
-l=c("dgg","kdk")
-typeof(setdiff(c(12,4),4))
+l=c("dgg","kdk","ndnkdnk")
+l[!l%in% "dgg"]
+
+
 ```

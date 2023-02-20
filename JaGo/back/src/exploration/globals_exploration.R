@@ -36,11 +36,11 @@ visualization_types_bi = function(cat){
 
 
 get_vizualizations_bi=function(cats){
-  viz_global=c("Tableau de Contingence en Effectif","Tableau de Contingence en Fréquence")
+  viz_global=c("Tableau de Contingence en Effectif","Tableau de Contingence en Fréquence","Diagramme en Barres")
   catgen1=visualization_types_bi(cats[1])
   catgen2=visualization_types_bi(cats[2])
   if (catgen1 == "quantitative" && catgen2 == "quantitative"){
-    return(c(viz_global,c("Boite à Moustaches")))
+    return(c(viz_global,c("Statistiques","Boite à Moustaches","TreeMap","Nuage de points")))
   }
   if (catgen1 == "qualitative" && catgen2 == "qualitative"){
     return(viz_global)
@@ -51,11 +51,21 @@ get_vizualizations_bi=function(cats){
 
   }
   if (catgen1 == "qualitative" && catgen2 == "quantitative"){
-    return(c(viz_global,c("Boite à Moustaches")))
+    return(c(viz_global,c("Statistiques","Boite à Moustaches","TreeMap")))
 
   }
   else{
     print(paste("A problem occur from get_vizualizations_bi:",cats))
+  }
+}
+
+bins_require_viz=function(viz){
+  if (viz == "Tableau de Contingence en Effectif" || viz == "Tableau de Contingence en Fréquence" ||
+      viz== "Boite à Moustaches" || viz == "Diagramme en Barres" || viz == "TreeMap" ||
+      viz == "Statistiques"){
+    return(TRUE)
+  } else{
+    return(FALSE)
   }
 }
 

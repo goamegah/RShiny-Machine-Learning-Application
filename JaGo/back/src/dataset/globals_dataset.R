@@ -2,6 +2,7 @@
 number_click_process=0
 
 get_categories = function(df){
+
   return(sapply(df, function(x) {
     if (is.integer(x)){
       "quantitative discrète"

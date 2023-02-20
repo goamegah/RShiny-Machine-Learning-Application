@@ -1,1 +1,2 @@
 sudo apt-get install libpng-dev
+conda install gxx_linux-64

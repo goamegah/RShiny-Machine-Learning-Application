@@ -2,10 +2,13 @@ if(! require("comprehenr")) install.packages("comprehenr")
 library(comprehenr)
 
 server = function (input, output, session) {
-  source("/home/khaldi/Documents/EDA_ML_RShiny/JaGo/back/src/dataset/globals_dataset.R")
-  source("/home/khaldi/Documents/EDA_ML_RShiny/JaGo/back/src/dataset/processing.R")
-  source("/home/khaldi/Documents/EDA_ML_RShiny/JaGo/back/src/exploration/globals_exploration.R")
-  source("/home/khaldi/Documents/EDA_ML_RShiny/JaGo/back/src/exploration/vizualizations.R")
+  source("./back/src/dataset/globals_dataset.R")
+  source("./back/src/dataset/processing.R")
+  source("./back/src/exploration/globals_exploration.R")
+  source("./back/src/exploration/vizualizations.R")
+  source("./back/src/machine_learning/globals_machine_learning.R")
+  source("./back/src/machine_learning/models.R")
+
   options(shiny.maxRequestSize=30*1024^2) #maximum size for uploading
   list_reavalues=reactiveValues(
     table=NULL, #initialization
@@ -30,12 +33,15 @@ server = function (input, output, session) {
             stringsAsFactors = FALSE)
           list_reavalues$table_all=personnalFile
           list_reavalues$table=data.frame(list_reavalues$table_all)
+
           list_reavalues$col_categories_all=get_categories(list_reavalues$table_all)
           list_reavalues$col_categories=get_categories(list_reavalues$table)
           list_reavalues$type_table=data.frame(variable = colnames(list_reavalues$table), type = sapply(list_reavalues$table, function(x){get_type_columns(x)}),
                                                category=list_reavalues$col_categories)
+
           rownames(list_reavalues$type_table) = NULL
           number_click_process=0 #initialization of process
+
           col_names=names(list_reavalues$table)
           output$input_varschoice=renderUI({
             selectInput("input_varschoice",label="Choisissez les variables à étudier",choices=cbind("#Toutes",col_names),selected = "#Toutes",multiple = TRUE)
@@ -54,7 +60,10 @@ server = function (input, output, session) {
           })
 
           #-------------------------------------------------------------------------------------------#
+          output$input_valid_exp=renderUI({
+            actionButton("input_valid_exp",label="Valider les options")
 
+          })
           output$input_exp_type=renderUI({
             selectInput("input_exp_type",
                         label="Choisissez le type d'exploration",
@@ -74,6 +83,33 @@ server = function (input, output, session) {
           output$input_bi_select_var=renderUI({
             selectizeInput("input_bi_select_var",label="Selectionner vos deux variables (x resp y)",choices=col_names,multiple=TRUE,options = list(maxItems = 2),selected =list_reavalues$col_names[1])
           })
+          #-------------------------------------------------------------------------------------------#
+          output$input_model_type=renderUI({
+            selectInput("input_model_type",label="Choix du type de modèle",choices=c("Classification Binaire","Classification Multi-Classes"),selected ="Classification Binaire")
+          })
+          quantitative_vars=list_reavalues$type_table %>%
+            filter(category == "qualitative ordinale" | category == "qualitative nominale" ) %>%
+            select(variable)
+          output$input_model_type_bin=renderUI({
+            selectInput("input_model_type_bin",label="Selectionner votre modèle",choices=MODELES_BIN,selected =MODELES_BIN[1])
+          })
+          output$input_proportion_bin=renderUI({
+            sliderInput("input_proportion_bin",label="Choisir la proportion pour le train Dataset",min=0,max=1,value=0.7,step=0.01)
+          })
+          output$input_threshold_bin=renderUI({
+            sliderInput("input_threshold_bin",label="Choisir le seuil d'acceptation (probabilités)",min=0,max=1,value=0.5,step=0.01)
+          })
+
+
+          output$input_model_outcome_bin=renderUI({
+            selectInput("input_model_outcome_bin",label="Variable à prédire",choices=quantitative_vars,selected =quantitative_vars[1])
+          })
+          modality_outcome=unique(list_reavalues$table[quantitative_vars[1]])
+          output$input_model_poschoice_bin=renderUI({
+            selectInput("input_model_poschoice_bin",label="Choix de la modalité positive",choices=modality_outcome,selected =modality_outcome[1])
+          })
+
+
         }, silent = TRUE)
       }
     }
@@ -96,6 +132,8 @@ server = function (input, output, session) {
       output$input_bi_select_var=renderUI({
         selectizeInput("input_bi_select_var",label="Selectionner vos deux variables (x resp y)",choices=input$input_varschoice,multiple=TRUE,options = list(maxItems = 2),selected =input$input_varschoice[1])
       })
+
+
     }
     else{
       list_reavalues$table=data.frame(list_reavalues$table_all)
@@ -150,6 +188,19 @@ server = function (input, output, session) {
 
   },ignoreNULL = TRUE,ignoreInit = TRUE)
 
+
+  observeEvent(input$input_process, {
+    number_click_process=number_click_process+1
+    if (number_click_process == 1){
+      list_reavalues$table_all=process(list_reavalues$table_all,list_reavalues$col_categories_all)
+
+    }
+    list_reavalues$table=process(list_reavalues$table,list_reavalues$col_categories)
+    list_reavalues$type_table=data.frame(variable = colnames(list_reavalues$table),type=sapply(list_reavalues$table,function(x){get_type_columns(x)}), category = list_reavalues$col_categories)
+  },ignoreNULL = TRUE,ignoreInit = TRUE)
+
+  #------------------------------------------------------------------------------------------------------------#
+
   observeEvent(input$input_uni_select_var, {
     if (input$input_exp_type == "Univariée"){
       if (length(input$input_uni_select_var) == 1){
@@ -162,6 +213,7 @@ server = function (input, output, session) {
       }
     }
   },ignoreNULL = TRUE,ignoreInit = TRUE)
+
 
 
   observeEvent(input$input_bi_select_var, {
@@ -186,31 +238,15 @@ server = function (input, output, session) {
   },ignoreNULL = TRUE,ignoreInit = TRUE)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  observeEvent(input$input_process, {
-    number_click_process=number_click_process+1
-    if (number_click_process == 1){
-      list_reavalues$table_all=process(list_reavalues$table_all,list_reavalues$col_categories_all)
-
+  observeEvent(input$input_bi_select_viz, {
+    if (bins_require_viz(input$input_bi_select_viz) == TRUE){
+      output$bins_input=renderUI({
+        selectInput("bins_input",label="Nombre de bacs",choices=1:15,selected=7)
+      })
+    } else{
+      output$bins_input=renderUI({})
     }
-    list_reavalues$table=process(list_reavalues$table,list_reavalues$col_categories)
-    list_reavalues$type_table=data.frame(variable = colnames(list_reavalues$table),type=sapply(list_reavalues$table,function(x){get_type_columns(x)}), category = list_reavalues$col_categories)
+
   },ignoreNULL = TRUE,ignoreInit = TRUE)
 
 
@@ -220,6 +256,7 @@ server = function (input, output, session) {
       df_col = list_reavalues$table[input$input_uni_select_var]
       viz_type = input$input_uni_select_viz
       print(viz_type)
+
       if (viz_type == "Statistiques"){
         output$viz_input = renderUI({
           renderTable(statistiques(df_col))
@@ -239,7 +276,7 @@ server = function (input, output, session) {
 
       } else if (viz_type == "Tableau des Effectifs/Fréquence par classe") {
         output$viz_input = renderUI({
-          renderTable(create_freq_table_continous(df_col))
+          renderTable(create_freq_table_continous(df_col,nbins = as.integer(input$bins_input)))
         })
       } else if (viz_type == "Diagramme en bâtons") {
         output$viz_input = renderUI({
@@ -258,11 +295,11 @@ server = function (input, output, session) {
         }
       } else if (viz_type == "Histogramme") {
         output$viz_input = renderUI({
-          renderPlot({ create_histogram_continous(df_col)})
+          renderPlot({ create_histogram_continous(df_col,nbins= as.integer(input$bins_input))})
         })
       } else if (viz_type == "Tableau des Effectifs/Fréquence par classe") {
         output$viz_input = renderUI({
-          renderTable(create_freq_table_continous(df_col))
+          renderTable(create_freq_table_continous(df_col,nbins= as.integer(input$bins_input)))
         })
       } else if (viz_type == "Fonction de répartition empirique") {
         type_col=get_type_col_by_name(list_reavalues$type_table,input$input_uni_select_var)
@@ -292,32 +329,131 @@ server = function (input, output, session) {
       type_col1=list_reavalues$col_categories[match(input$input_bi_select_var[1], names(list_reavalues$col_categories))]
       type_col2=list_reavalues$col_categories[match(input$input_bi_select_var[2], names(list_reavalues$col_categories))]
       type_cols=c(type_col1,type_col2)
-      if (viz_type == "Tableau de Contingence en Effectif"){
-        print(viz_type)
-        table=two_var_contingency_table(df_cols,type_cols = c(type_col1,type_col2))
+      if (viz_type == "Statistiques"){
+        table=two_var_statistics(df_cols,type_cols = c(type_col1,type_col2),nbins=as.integer(input$bins_input))
+        output$viz_input = renderUI({
+          renderTable(table,rownames = TRUE,colnames = TRUE)
+        })
+      } else if (viz_type == "Tableau de Contingence en Effectif"){
+        table=two_var_contingency_table(df_cols,type_cols = c(type_col1,type_col2),nbins = as.integer(input$bins_input))
         output$viz_input = renderUI({
           renderTable(table,rownames = TRUE,colnames = TRUE)
         })
       } else if (viz_type == "Tableau de Contingence en Fréquence"){
         print(viz_type)
-        table=two_var_contingency_table(df_cols,type_cols = type_cols,with_freq=TRUE)
+        table=two_var_contingency_table(df_cols,type_cols = type_cols,with_freq=TRUE,nbins = as.integer(input$bins_input))
         output$viz_input = renderUI({
           renderTable(table,rownames = TRUE,colnames = TRUE)
         })
       } else if (viz_type == "Boite à Moustaches"){
+          #Y\X --> Y:col2 and X:col1
+          output$viz_input = renderUI({
+            renderPlot(two_var_boxplot_qual_var_cond(df_cols,type_cols = type_cols,nbins=as.integer(input$bins_input)))
+        })
+      } else if (viz_type == "Diagramme en Barres"){
         #Y\X --> Y:col2 and X:col1
         output$viz_input = renderUI({
-          renderPlot(two_var_boxplot_qual_var_cond(df_cols,type_cols = type_cols))
+          renderPlot(two_var_barplot_cond(df_cols,type_cols = type_cols,nbins=as.integer(input$bins_input)))
         })
-
+      } else if (viz_type == "TreeMap"){
+        #Y\X --> Y:col2 and X:col1
+        output$viz_input = renderUI({
+          renderPlot(two_var_treemap_2_var(df_cols,type_cols = type_cols,nbins=as.integer(input$bins_input)))
+        })
+      } else if (viz_type == "Nuage de points"){
+        #Y\X --> Y:col2 and X:col1
+        output$viz_input = renderUI({
+          renderPlot(two_var_scatterplot(df_cols,type_cols = type_cols))
+        })
       }
 
     }
 
 
   },ignoreNULL = TRUE,ignoreInit = TRUE)
-  
-  
+
+  #------------------------------------------------------------------------------------------------------------#
+
+
+
+
+  observeEvent(input$input_model_outcome_bin, {
+    features=setdiff(colnames(list_reavalues$table),c(input$input_model_outcome_bin))
+    output$input_model_features_bin=renderUI({
+      selectizeInput("input_model_features_bin",label="Selectionner vos features",choices=features,multiple=TRUE,options = list(maxItems = length(features)),selected =features[1])
+    })
+
+
+
+    output$input_valid_model_bin=renderUI({
+      actionButton("input_valid_model_bin",label="Valider les options")
+    })
+    modality_outcome=unique(list_reavalues$table[input$input_model_outcome_bin])
+    output$input_model_poschoice_bin=renderUI({
+      selectInput("input_model_poschoice_bin",label="Choix de la modalité positive",choices=modality_outcome,selected =modality_outcome[1])
+    })
+
+  },ignoreNULL = TRUE,ignoreInit = TRUE)
+
+
+
+
+  observeEvent(input$input_valid_model_bin,{
+    outcome=as.character(input$input_model_outcome_bin)
+    mod_positive=as.character(input$input_model_poschoice_bin)
+    features=input$input_model_features_bin
+    df=list_reavalues$table[,c(outcome,features)]
+    outcome_model=df[outcome]==mod_positive
+    df[,outcome]=outcome_model
+    col_categories=list_reavalues$col_categories[names(list_reavalues$col_categories)
+                                                   %in% c(outcome,features)][c(outcome,features)]
+    prop=as.numeric(input$input_proportion_bin)
+    threshold=as.numeric(input$input_threshold_bin)
+    model=NULL
+    model_name=NULL
+    true_labels_test=NULL
+    pred_prob_test=NULL
+    if (input$input_model_type_bin == "Arbre de décision CART"){
+      model_name="Arbre de décision CART"
+      prune=input$input_model_pruned_bin
+      model_results=decision_tree_model(df[,c(outcome,features)],outcome,col_categories = col_categories,method="CART",prop=prop,prune=prune)
+      model=model_results[[1]]
+      true_labels_test=as.logical(unlist(model_results[2]))
+      pred_prob_test=unlist(model_results[3])
+    }
+    if (input$input_model_type_bin == "Arbre de décision CHAID"){
+      nbins=as.integer(input$input_model_bins_bin)
+      model_name="Arbre de décision CHAID"
+      model_results=decision_tree_model(df[,c(outcome,features)],outcome,col_categories = col_categories,method="CHAID",prop=prop,nbins=nbins)
+      model=model_results[[1]]
+      true_labels_test=as.logical(unlist(model_results[2]))
+      pred_prob_test=unlist(model_results[3])
+    }
+
+
+    metrics_confusion=calculate_metrics(true_labels_test,pred_prob_test>threshold)
+    metrics=as.data.frame(metrics_confusion["metrics"])
+    colnames(metrics)=c("Accuracy","Error Rate","Precision","Recall","F1-score")
+    output$input_viz_tree_bin = renderUI({
+      renderPlot(plot_tree_model(model,model_name))
+    })
+    output$input_metrics_model_bin = renderUI({
+      renderTable(metrics)
+    })
+    confusion_matrix=metrics_confusion["confusion_matrix"]
+    output$input_confusion_model_bin = renderUI({
+      renderTable(confusion_matrix,rownames = TRUE,colnames = TRUE)
+    })
+
+
+
+
+
+  },ignoreNULL = TRUE,ignoreInit = TRUE)
+
+
+
+
   output$output_table = renderDataTable({
     if(!is.null(list_reavalues$table)) DT::datatable(list_reavalues$table,options = list(scrollX=TRUE,scrollY = "200px"))
   })
