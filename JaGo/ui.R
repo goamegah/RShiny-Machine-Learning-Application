@@ -145,7 +145,7 @@ ui = dashboardPage(
                                      column(2,checkboxInput("input_model_pruned_bin", "Arbre élagué ?", value = FALSE))
                    ),
                    conditionalPanel(condition="input.input_model_type_bin == 'Arbre de décision CHAID'",
-                                    column(2,selectInput("input_model_bins_bin",label="Nombre de bacs pour les quantitatives",choices=1:15,selected=7))
+                                    column(2,selectInput("input_model_bins_bin",label="Nombre de bacs",choices=1:15,selected=7))
                    )
 
                  ),
@@ -171,7 +171,7 @@ ui = dashboardPage(
       )
     ),
   ),
-  title = "Title",
+  title = "JaGo",
   
 )
 

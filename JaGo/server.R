@@ -17,6 +17,7 @@ server = function (input, output, session) {
     col_categories=NULL,
     col_categories_all=NULL,
   )
+
   observeEvent(input$input_valid_button,{
     if(input$input_typedata_choice=="Fichier personnel"){
       if(input$input_format=="csv"){
@@ -94,7 +95,7 @@ server = function (input, output, session) {
             selectInput("input_model_type_bin",label="Selectionner votre modèle",choices=MODELES_BIN,selected =MODELES_BIN[1])
           })
           output$input_proportion_bin=renderUI({
-            sliderInput("input_proportion_bin",label="Choisir la proportion pour le train Dataset",min=0,max=1,value=0.7,step=0.01)
+            sliderInput("input_proportion_bin",label="Choisir la proportion pour le train Dataset",min=0.01,max=1,value=0.7,step=0.01)
           })
           output$input_threshold_bin=renderUI({
             sliderInput("input_threshold_bin",label="Choisir le seuil d'acceptation (probabilités)",min=0,max=1,value=0.5,step=0.01)
@@ -116,6 +117,7 @@ server = function (input, output, session) {
   })
   
   observeEvent(input$input_varschoice, {
+
     if(!"#Toutes" %in% input$input_varschoice){
       list_reavalues$table=as.data.frame(list_reavalues$table_all[input$input_varschoice])
       indices_col = match(input$input_varschoice, names(list_reavalues$col_categories_all))
@@ -126,12 +128,21 @@ server = function (input, output, session) {
       output$input_varchoice=renderUI({
         selectInput("input_varchoice",label="Choisissez une variable",choices=input$input_varschoice,selected = input$input_varschoice[1])
       })
+      #---------------------------------------------------------#
       output$input_uni_select_var=renderUI({
         selectInput("input_uni_select_var",label="Selectionner votre variable",choices=input$input_varschoice,selected = input$input_varschoice[1])
       })
       output$input_bi_select_var=renderUI({
         selectizeInput("input_bi_select_var",label="Selectionner vos deux variables (x resp y)",choices=input$input_varschoice,multiple=TRUE,options = list(maxItems = 2),selected =input$input_varschoice[1])
       })
+      #--------------------------------------------------------#
+      quantitative_vars=list_reavalues$type_table %>%
+        filter(category == "qualitative ordinale" | category == "qualitative nominale" ) %>%
+        select(variable)
+      output$input_model_outcome_bin=renderUI({
+        selectInput("input_model_outcome_bin",label="Variable à prédire",choices=quantitative_vars,selected =quantitative_vars[1])
+      })
+
 
 
     }
@@ -151,6 +162,14 @@ server = function (input, output, session) {
       output$input_bi_select_var=renderUI({
         selectizeInput("input_bi_select_var",label="Selectionner vos deux variables (x resp y)",choices=col_names,multiple=TRUE,options = list(maxItems = 2),selected =col_names[1])
       })
+      #--------------------------------------------------------#
+      quantitative_vars=list_reavalues$type_table %>%
+        filter(category == "qualitative ordinale" | category == "qualitative nominale" ) %>%
+        select(variable)
+      output$input_model_outcome_bin=renderUI({
+        selectInput("input_model_outcome_bin",label="Variable à prédire",choices=quantitative_vars,selected =quantitative_vars[1])
+      })
+
     }
   },ignoreNULL = TRUE,ignoreInit = TRUE)
   
@@ -379,11 +398,14 @@ server = function (input, output, session) {
 
   observeEvent(input$input_model_outcome_bin, {
     features=setdiff(colnames(list_reavalues$table),c(input$input_model_outcome_bin))
-    output$input_model_features_bin=renderUI({
-      selectizeInput("input_model_features_bin",label="Selectionner vos features",choices=features,multiple=TRUE,options = list(maxItems = length(features)),selected =features[1])
-    })
-
-
+    if (!length(features)){
+      output$input_model_features_bin=renderUI({
+      })
+    }else{
+      output$input_model_features_bin=renderUI({
+        selectizeInput("input_model_features_bin",label="Selectionner vos features",choices=features,multiple=TRUE,options = list(maxItems = length(features)),selected =features[1])
+      })
+    }
 
     output$input_valid_model_bin=renderUI({
       actionButton("input_valid_model_bin",label="Valider les options")

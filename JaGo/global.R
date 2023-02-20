@@ -25,5 +25,4 @@ library(party)
 library(CHAID)
 library(ISLR)
 library(rpart.plot)
-
 useShinyjs()
