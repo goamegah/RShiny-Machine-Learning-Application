@@ -1,14 +1,29 @@
 ##### Interface Utilisateur - UI =================================
+# 
+# Dans cette partie nous définissons les visuels (boutons, champs, widgets) 
+# ainsi la logique d'apparition de ces derniers en fonction du choix de l'
+# utilisateur
+#
+# Notes:  Dans l'optique d'améliorer la lisibilité du code, nous avions
+#         introduit quelques notation de commentaire.
+# e.g:
+# - Les suggestion de code seront reconnu grâce au symbole (%%%)
+# - Les commentaire relative au section de code grâce au symbole (===) 
+# - Les commentaire des sous fonctionnalités via le symbole (***)
+#
+##### ========================= *** =================================
 
 ui = dashboardPage(
   
-  ##### Header  =================================
+  # === Header  =================================
   dashboardHeader(
     title = "JaGo"
   ),
   
-  ##### SideBar  =================================
+  # === SideBar  =================================
   dashboardSidebar(
+    
+    # *** Choix du type de données
     selectInput(
       "input_typedata_choice",
       label = "Choix du type de données",
@@ -16,6 +31,8 @@ ui = dashboardPage(
     ),
     
     # Condition:
+    # *** Cas des fichiers personnels
+    # *******************************
     conditionalPanel(
       condition = "input.input_typedata_choice == 'Fichier personnel'",
       fileInput(
@@ -23,24 +40,29 @@ ui = dashboardPage(
         label = "Fichier à importer", 
         placeholder = "Choississez votre fichier"
         ),
-        selectInput(
-          "input_format",
-          label = "Sélectionner le format de fichier",
-          choices = c("csv","json","Autre")
-          ),
+      selectInput(
+        "input_format",
+        label = "Sélectionner le format de fichier",
+        choices = c("csv", "json", "Autre")
+        ),
       checkboxInput(
         "input_header_file",
         label = "Noms de variables présents",
         value = FALSE
         ),
-      #
+      
       sliderInput(
         "input_fileSkip",
         label = "Ignorer les premières lignes?",
-        min=0, max=101, value=0, step=1
+        min = 0, 
+        max = 101, # %% max peut être dynamique (dépendant du nombre de données)
+        value = 0,
+        step = 1 
         ),
       
-      # Condition:
+      # Sous Condition:
+      # *** Cas des fichiers CSV
+      # ************************
       conditionalPanel(
         condition = "input.input_format == 'csv'",
         radioButtons(
@@ -55,7 +77,9 @@ ui = dashboardPage(
           selected = ","
           ),
         
-        # Condition:  
+        # Sous sous Condition:  
+        # *** Cas des autres formats de fichiers 
+        # **************************************
         conditionalPanel(
           condition = "input.input_fileSep == 'autre'",
           textInput(
@@ -63,7 +87,6 @@ ui = dashboardPage(
             label = "Séparateur"
             )
           ),
-        
         radioButtons(
           "input_fileDec",
           label = "Séparateur de décimales",
@@ -73,12 +96,14 @@ ui = dashboardPage(
     ),
     
     # Condition:
+    # *** Cas des fichiers intégrés
+    # *****************************
     conditionalPanel(
       condition ="input.input_typedata_choice == 'Fichier intégré'",
       selectInput(
         "input_intdataset",
         label = "Sélectionner le dataset intégré",
-        choices = NULL
+        choices = NULL # %% On listera les data sets plûtard. %%
         ),
       checkboxInput(
         "input_header_file",
@@ -92,7 +117,9 @@ ui = dashboardPage(
         )
       ),
     
-    actionButton("input_valid_button",label="Valider")
+    actionButton("input_valid_button", label = "Valider")
+    
+    # %% Le meilleur reste à venir ;) . %%
   ),
   
   ##### Le centre la page  =================================
@@ -104,10 +131,13 @@ ui = dashboardPage(
       id = "tabox_exp",
       width=12,
       
-      # ---------------------- Elements de la partie Dataset
+      # ---------------------- Eléments de la partie Data set
       tabPanel(
         "Dataset",
         
+        # Visuel:
+        # *** Espace réservé au tableau pour l'aperçue du data set
+        # ********************************************************
         fluidRow(
           column(
             12, 
@@ -117,6 +147,9 @@ ui = dashboardPage(
             )
           ),
         
+        # Visuel:
+        # *** Espace réservé au tableau pour l'aperçue du type des variables
+        # ******************************************************************
         fluidRow(
           column(
             12,
@@ -126,7 +159,10 @@ ui = dashboardPage(
               )
             )
           ),
-          
+        
+        # Visuel:
+        # *** Espace réservé au choix des var. et de la def. de leur type
+        # ***************************************************************
         fluidRow(
           column(
             12,
@@ -157,9 +193,13 @@ ui = dashboardPage(
           )
         ),
       
-      # ---------------------- Elements de la partie Exploration
+      # ---------------------- Eléments de la partie Exploration
       tabPanel(
         "Exploration",
+        
+        # Visuel:
+        # *** Espace réservé au choix du type var., la.es var. et les vis.
+        # ***************************************************************
         fluidRow(
           column(
             3,
@@ -168,6 +208,8 @@ ui = dashboardPage(
           ),
         
         # Condition:
+        # *** Cas d'une exploration Uni variée
+        # ************************************
         conditionalPanel(
           condition = "input.input_exp_type == 'Univariée'",
           fluidRow(
@@ -183,6 +225,8 @@ ui = dashboardPage(
           ),
         
         # Condition:
+        # *** Cas d'une exploration Bivariée
+        # **********************************
         conditionalPanel(
           condition = "input.input_exp_type == 'Bivariée'",
           fluidRow(
@@ -208,6 +252,9 @@ ui = dashboardPage(
             )
           ),
         
+        # Visuel:
+        # *** Zone réservée aux visualisations
+        # ************************************
         fluidRow(
           column(
             12,
@@ -216,10 +263,14 @@ ui = dashboardPage(
           )
         ),
       
-      # ---------------------- Elements de la partie Machine Learning
+      # ---------------------- Eléments de la partie Machine E-learning
       tabPanel(
         "Apprentissage de Modèles",
         uiOutput("input_model_type"),
+        
+        # Condition:
+        # *** Cas d'une Classification Binaire
+        # ************************************
         conditionalPanel(
           condition ="input.input_model_type == 'Classification Binaire'",
           fluidRow(
@@ -251,9 +302,12 @@ ui = dashboardPage(
               uiOutput("input_model_features_bin")
               ),
             
-            # Condition:
+            # Sous Condition:
+            # *** Cas d'une Classification Binaire - CART (arbre à 2 branches)
+            # ****************************************************************
             conditionalPanel(
-              condition ="input.input_model_type_bin == 'Arbre de décision CART'",
+              condition =
+                "input.input_model_type_bin == 'Arbre de décision CART'",
               column(
                 2,
                 checkboxInput(
@@ -262,9 +316,12 @@ ui = dashboardPage(
                 )
               ),
             
-            # Condition
+            # Sous Condition:
+            # *** Cas d'une Classification Binaire - CHAID (arbre multibranches)
+            # ******************************************************************
             conditionalPanel(
-              condition = "input.input_model_type_bin == 'Arbre de décision CHAID'",
+              condition = 
+                "input.input_model_type_bin == 'Arbre de décision CHAID'",
               column(
                 2,
                 selectInput(
@@ -284,6 +341,7 @@ ui = dashboardPage(
               )
             ),
           
+          # Zone pour la afficher quelques info (table de conf., tab Métriques)
           fluidRow(
             column(
               5,
@@ -295,7 +353,9 @@ ui = dashboardPage(
               )
             ),
           
-          # Condition:
+          # Sous Condition:
+          # *** Zone pour affichage de l'arbre de décision 
+          # **********************************************
           conditionalPanel(
             condition = 
               "input.input_model_type_bin == 'Arbre de décision CART' ||

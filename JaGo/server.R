@@ -28,6 +28,7 @@ server = function (input, output, session) {
   
   # Déclaration de quelques variables réactives pour la synchro ***************
   options(shiny.maxRequestSize = 30*1024^2) #maximum size for uploading
+  
   list_reavalues=reactiveValues(
     table=NULL, #initialization
     table_all=NULL,
@@ -391,12 +392,11 @@ server = function (input, output, session) {
         label ="Variable à prédire",
         choices = quantitative_vars,
         selected = quantitative_vars[1])
-    })
-    
-  },
-  ignoreNULL = TRUE,
-  ignoreInit = TRUE
-  )
+      })
+    },
+    ignoreNULL = TRUE,
+    ignoreInit = TRUE
+    )
   
   
   observeEvent(input$input_process, {
