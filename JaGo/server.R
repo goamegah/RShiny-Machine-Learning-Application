@@ -37,18 +37,24 @@ server = function (input, output, session) {
     col_categories_all=NULL,
   )
   
-  # Spécification des évènements et Actions trigger *************************** 
+  # Event:
+  # *** Gestion des évènements de l'UI 
+  # - sep : variable séparateur
+  # - personnalFile : variable fichier 
+  # ************************************
   observeEvent(
     input$input_valid_button, {
       if(input$input_typedata_choice == "Fichier personnel"){
       
-      # *************** Traitements des fichiers CSV ****************
+      # Event:
+      # *** Traitement des fichier CSV
+      # *********************************
       if(input$input_format == "csv"){
         if (is.null(input$input_file)) personnalFile = NULL
         if (input$input_fileSep == 'autre') sep = input$input_fileSepOther
         else sep = input$input_fileSep
         try({
-          personnalFile=read.table(
+          personnalFile = read.table(
             input$input_file$datapath,
             header = input$input_header_file,
             sep = sep,
@@ -74,11 +80,13 @@ server = function (input, output, session) {
           number_click_process = 0 #initialization of process
           
           col_names = names(list_reavalues$table)
+          
+          # Ajout dans la zone prévu le nom des vars. comme option
           output$input_varschoice = renderUI({
             selectInput(
               "input_varschoice",
               label = "Choisissez les variables à étudier",
-              choices = cbind("#Toutes",col_names),
+              choices = cbind("#Toutes", col_names),
               selected = "#Toutes",
               multiple = TRUE)
           })
@@ -177,8 +185,11 @@ server = function (input, output, session) {
     }
   })
   
+  # Event:
+  # *** La def. du type des vars. dépend des choix des variables à étudier
+  # **********************************************************************
   observeEvent(input$input_varschoice, {
-    
+    # *** =====> pause
     if(!"#Toutes" %in% input$input_varschoice){
       list_reavalues$table = as.data.frame(
         list_reavalues$table_all[input$input_varschoice])
