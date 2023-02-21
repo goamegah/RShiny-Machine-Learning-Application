@@ -47,9 +47,9 @@ server = function (input, output, session) {
           output$input_varschoice=renderUI({
             selectInput("input_varschoice",label="Choisissez les variables à étudier",choices=cbind("#Toutes",col_names),selected = "#Toutes",multiple = TRUE)
           })
-          output$input_varchoice=renderUI({
-            selectInput("input_varchoice",label="Choisissez une variable",choices=col_names,selected = col_names[1])
-          })
+          #OKoutput$input_varchoice=renderUI({
+          #  selectInput("input_varchoice",label="Choisissez une variable",choices=col_names,selected = col_names[1])
+          #})
           output$input_type_varchoice=renderUI({
             selectInput("input_type_varchoice",label="Choisissez la catégorie de la variable",choices=c("quantitative discrète","quantitative continue","qualitative ordinale","qualitative nominale"),selected="quantitative discrète")
           })
@@ -72,25 +72,23 @@ server = function (input, output, session) {
                         selected = "Univariée"
             )
           })
-          output$input_uni_select_viz=renderUI({
-            selectInput("input_uni_select_viz",label="Selectionner votre visualisation",choices=get_vizualizations(get_type_col_by_name(list_reavalues$type_table,input$input_varchoice)),selected =get_vizualizations(get_type_col_by_name(list_reavalues$type_table,input$input_varchoice))[1])
-          })
-          output$input_bi_select_viz=renderUI({
-            selectInput("input_bi_select_viz",label="Selectionner votre visualisation",choices=NULL)
-          })
-          output$input_uni_select_var=renderUI({
-            selectInput("input_uni_select_var",label="Selectionner votre variable",choices=col_names,selected =input$input_varchoice )
-          })
-          output$input_bi_select_var=renderUI({
-            selectizeInput("input_bi_select_var",label="Selectionner vos deux variables (x resp y)",choices=col_names,multiple=TRUE,options = list(maxItems = 2),selected =list_reavalues$col_names[1])
-          })
+          #OKoutput$input_uni_select_viz=renderUI({
+          #  selectInput("input_uni_select_viz",label="Selectionner votre visualisation",choices=get_vizualizations(get_type_col_by_name(list_reavalues$type_table,input$input_varchoice)),selected =get_vizualizations(get_type_col_by_name(list_reavalues$type_table,input$input_varchoice))[1])
+          #})
+          #OKoutput$input_bi_select_viz=renderUI({
+          #  selectInput("input_bi_select_viz",label="Selectionner votre visualisation",choices=NULL)
+          #})
+          #OKoutput$input_uni_select_var=renderUI({
+          #  selectInput("input_uni_select_var",label="Selectionner votre variable",choices=col_names,selected =input$input_varchoice )
+          #})
+          #OKoutput$input_bi_select_var=renderUI({
+          #  selectizeInput("input_bi_select_var",label="Selectionner vos deux variables (x resp y)",choices=col_names,multiple=TRUE,options = list(maxItems = 2),selected =list_reavalues$col_names[1])
+          #})
           #-------------------------------------------------------------------------------------------#
           output$input_model_type=renderUI({
             selectInput("input_model_type",label="Choix du type de modèle",choices=c("Classification Binaire","Classification Multi-Classes"),selected ="Classification Binaire")
           })
-          quantitative_vars=list_reavalues$type_table %>%
-            filter(category == "qualitative ordinale" | category == "qualitative nominale" ) %>%
-            select(variable)
+
           output$input_model_type_bin=renderUI({
             selectInput("input_model_type_bin",label="Selectionner votre modèle",choices=MODELES_BIN,selected =MODELES_BIN[1])
           })
@@ -101,14 +99,16 @@ server = function (input, output, session) {
             sliderInput("input_threshold_bin",label="Choisir le seuil d'acceptation (probabilités)",min=0,max=1,value=0.5,step=0.01)
           })
 
-
+          quantitative_vars=list_reavalues$type_table %>%
+            filter(category == "qualitative ordinale" | category == "qualitative nominale" ) %>%
+            select(variable)
           output$input_model_outcome_bin=renderUI({
             selectInput("input_model_outcome_bin",label="Variable à prédire",choices=quantitative_vars,selected =quantitative_vars[1])
           })
-          modality_outcome=unique(list_reavalues$table[quantitative_vars[1]])
-          output$input_model_poschoice_bin=renderUI({
-            selectInput("input_model_poschoice_bin",label="Choix de la modalité positive",choices=modality_outcome,selected =modality_outcome[1])
-          })
+          #modality_outcome=unique(list_reavalues$table[quantitative_vars[1]])
+          #output$input_model_poschoice_bin=renderUI({
+          #  selectInput("input_model_poschoice_bin",label="Choix de la modalité positive",choices=modality_outcome,selected =modality_outcome[1])
+          #})
 
 
         }, silent = TRUE)
@@ -142,7 +142,10 @@ server = function (input, output, session) {
       output$input_model_outcome_bin=renderUI({
         selectInput("input_model_outcome_bin",label="Variable à prédire",choices=quantitative_vars,selected =quantitative_vars[1])
       })
-
+      features=setdiff(colnames(list_reavalues$table),c(input$input_model_outcome_bin))
+      output$input_model_features_bin=renderUI({
+        selectizeInput("input_model_features_bin",label="Selectionner vos features",choices=features,multiple=TRUE,options = list(maxItems = length(features)),selected =features[1])
+      })
 
 
     }
@@ -168,6 +171,10 @@ server = function (input, output, session) {
         select(variable)
       output$input_model_outcome_bin=renderUI({
         selectInput("input_model_outcome_bin",label="Variable à prédire",choices=quantitative_vars,selected =quantitative_vars[1])
+      })
+      features=setdiff(colnames(list_reavalues$table),c(input$input_model_outcome_bin))
+      output$input_model_features_bin=renderUI({
+        selectizeInput("input_model_features_bin",label="Selectionner vos features",choices=features,multiple=TRUE,options = list(maxItems = length(features)),selected =features[1])
       })
 
     }
@@ -204,6 +211,12 @@ server = function (input, output, session) {
 
       }
     }
+    quantitative_vars=list_reavalues$type_table %>%
+      filter(category == "qualitative ordinale" | category == "qualitative nominale" ) %>%
+      select(variable)
+    output$input_model_outcome_bin=renderUI({
+      selectInput("input_model_outcome_bin",label="Variable à prédire",choices=quantitative_vars,selected =quantitative_vars[1])
+    })
 
   },ignoreNULL = TRUE,ignoreInit = TRUE)
 
