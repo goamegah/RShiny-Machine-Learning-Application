@@ -2,20 +2,19 @@ TODO:
 Bonus:
 Faire le graphe des inputs
 1. Dataset
-nombre de catégories/ présence d'outliers ? / normalisation ? / dummification ?
+nombre de catégories OK
+/ présence d'outliers OK ? / normalisation OK ? / dummification ? OK
 
 
 2. Analyse exploratoire
 BONUS: transformation des "plots standard" en "ggplot".
 
 3. Machine Learning
-
-- Faire classification multi-classes
-
 - Classification Binaire: 
-(*) intégration courbe ROC, AUC.
+(*) intégration courbe ROC, AUC. OK
 (*) déséquilibre des classes ?:
 https://www.kaggle.com/rafjaa/resampling-strategies-for-imbalanced-datasets
+
 
 
 BONUS Global:
