@@ -1,14 +1,17 @@
 #global variables for dataset panel
 number_click_process=0
+PARAMS=c("Type de variable","Outliers","Normalisation","Dummification")
 
 get_categories = function(df){
-
+  print("lslssjddj")
   return(sapply(df, function(x) {
+    print("lslsl")
     if (is.integer(x)){
       "quantitative discrète"
     }
     if (is.numeric(x)) {
-      if (sum(x-floor(x)==0)/length(x)>.99) {
+      x_who_na=x[!is.na(x)]
+      if (sum(x_who_na-floor(x_who_na)==0)/length(x_who_na)>.99) {
         "quantitative discrète"
       } else {
         "quantitative continue"
@@ -16,7 +19,7 @@ get_categories = function(df){
     } else if (is.character(x)) {
       "qualitative nominale"
     } else if (is.logical(x)) {
-      "qualitative ordinale"
+      "qualitative nominale"
     } else if (is.factor(x)) {
       if (is.ordered(x)) {
         "qualitative ordinale"

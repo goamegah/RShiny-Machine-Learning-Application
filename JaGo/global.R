@@ -11,7 +11,11 @@ if(!require("ISLR")) install.packages("ISLR")
 if(!require("rpart.plot")) install.packages("rpart.plot")
 if(!require("party")) install.packages("party")
 if(!require("CHAID")) install.packages("CHAID")
+if(!require("fastDummies")) install.packages("fastDummies")
+if(!require("pROC")) install.packages("pROC")
+if(! require("comprehenr")) install.packages("comprehenr")
 
+library(comprehenr)
 library(shiny)
 library(shinydashboard)
 library(shinyjs)
@@ -25,4 +29,9 @@ library(party)
 library(CHAID)
 library(ISLR)
 library(rpart.plot)
+library(fastDummies)
+library(pROC)
+
 useShinyjs()
+
+

@@ -17,6 +17,13 @@ get_vizualizations=function(cat){
 
 }
 
+bins_require_viz_uni=function(viz){
+  if (viz == "Histogramme" || viz == "Tableau des Effectifs/Fréquence par classe"){
+    return(TRUE)
+  } else{
+    return(FALSE)
+  }
+}
 
 
 
@@ -59,13 +66,15 @@ get_vizualizations_bi=function(cats){
   }
 }
 
-bins_require_viz=function(viz){
-  if (viz == "Tableau de Contingence en Effectif" || viz == "Tableau de Contingence en Fréquence" ||
-      viz== "Boite à Moustaches" || viz == "Diagramme en Barres" || viz == "TreeMap" ||
-      viz == "Statistiques"){
-    return(TRUE)
-  } else{
-    return(FALSE)
+bins_require_viz_bi=function(viz,cats){
+  cat1=visualization_types_bi(cats[1])
+  cat2=visualization_types_bi(cats[2])
+  if (viz == "Tableau de Contingence en Effectif" || viz == "Tableau de Contingence en Fréquence" || viz == "Diagramme en Barres"){
+    return (cat1 == "quantitative" || cat2 == "quantitative")
   }
+  if (viz== "Boite à Moustaches"  || viz == "TreeMap" || viz == "Statistiques"){
+    return(cat1 == "quantitative")
+  }
+  return(FALSE)
 }
 

@@ -1,4 +1,4 @@
-MODELES_BIN=c("Arbre de décision CART","Arbre de décision CHAID")
+MODELES_BIN=c("Régression Logistique","Arbre de décision CART","Arbre de décision CHAID")
 
 discretization_col=function(col_vec,nbins){
   col_vec=as.numeric(col_vec)
