@@ -10,7 +10,7 @@ library(ggplot2)
 library(dplyr)
 library(treemapify)
 
-#dataframe1=read.csv("/home/khaldi/Documents/EDA_ML_RShiny/JaGo/data/datasets/click_rates.csv")
+#dataframe1=read.csv("/home/khaldi/Documents/EDA_ML_RShiny/app/data/datasets/click_rates.csv")
 
 #diag_barres_qualitative(dataframe["Headline"])
 

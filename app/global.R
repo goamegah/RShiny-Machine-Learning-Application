@@ -1,4 +1,4 @@
-if(!require("shinyjs")) install.packages("shinyjs")
+if(!require("shinyjs")) install.packages("shinyjs",dependencies = TRUE)
 if(!require("shiny")) install.packages("shiny")
 if(!require("shinydashboard")) install.packages("shinydashboard")
 if(!require("DT")) install.packages("DT")
@@ -10,10 +10,11 @@ if(!require("rpart")) install.packages("rpart")
 if(!require("ISLR")) install.packages("ISLR")
 if(!require("rpart.plot")) install.packages("rpart.plot")
 if(!require("party")) install.packages("party")
-if(!require("CHAID")) install.packages("CHAID")
+if(!require("CHAID")) install.packages("CHAID", repos = "http://R-Forge.R-project.org", type = "source")
 if(!require("fastDummies")) install.packages("fastDummies")
 if(!require("pROC")) install.packages("pROC")
 if(! require("comprehenr")) install.packages("comprehenr")
+if(! require("ROSE")) install.packages("ROSE")
 
 library(comprehenr)
 library(shiny)
@@ -31,7 +32,7 @@ library(ISLR)
 library(rpart.plot)
 library(fastDummies)
 library(pROC)
-
+library(ROSE)
 useShinyjs()
 
 

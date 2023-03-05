@@ -41,20 +41,19 @@ df=data.frame(x=c(1,2,3),y=c(4,5,6))
 
 Type any R code in the chunk, for example:
 ```{r}
-eyes = factor(c("Bleu", "Marron", "Marron", "Vert", "Marron"),
-              levels = c("Marron", "Vert"),
-              ordered = TRUE)
-levels(eyes)
-
+a=c(5)
+mode(c("dldl","dldl","dnd"))
 ```
 
 Now, click the **Run** button on the chunk toolbar to [execute](https://www.jetbrains.com/help/pycharm/r-markdown.html#run-r-code) the chunk code. The result should be placed under the chunk.
 Click the **Knit and Open Document** to build and preview an output.
 ```{r}
 df1=data.frame(x=c(1,5,5),variable=c("a","b","c"))
-df2=df1
-df2["x"]=0
-df1[df1["variable"]=="a",][1]
+vec=c(1,2,3)
+names(vec)=c("N")
+a=cbind(df1,vec)
+colnames(a)=c(colnames(df1),names(vec))
+print(a)
 
 ```
 ```{r}

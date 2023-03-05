@@ -23,3 +23,9 @@ discretization_cols=function(df_cols,col_categories,nbins=10){
   }
     return(df_cols)
 }
+
+
+
+
+
+

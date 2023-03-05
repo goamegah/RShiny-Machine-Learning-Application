@@ -1,4 +1,3 @@
-
 plot_tree_model=function(model,name){
   if(name=="Arbre de décision CART"){
     return(rpart.plot(model,roundint = FALSE))

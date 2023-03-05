@@ -18,7 +18,7 @@
 
 ui = dashboardPage(
   dashboardHeader(
-    title = "JaGo"
+    title = ""
   ),
   dashboardSidebar(
     # *** Choix du type de données
@@ -33,14 +33,15 @@ ui = dashboardPage(
                      fileInput("input_file", label = "Fichier à importer", placeholder = "Choississez votre fichier"),
                      selectInput("input_format",
                                  label="Sélectionner le format de fichier",
-                                 choices=c("csv","json","Autre")
+                                 choices=c("csv")
                      ),
-                     checkboxInput("input_header_file",label = "Noms de variables présents", value = FALSE),
-                     sliderInput("input_fileSkip",label="Ignorer les premières lignes?",min=0,max=101,value=0,step=1),
+
                      # Sous Condition:
                      # *** Cas des fichiers CSV
                      # ************************
                      conditionalPanel(condition = "input.input_format == 'csv'",
+                                      checkboxInput("input_header_file",label = "Noms de variables présents", value = FALSE),
+                                      sliderInput("input_fileSkip_csv",label="Ignorer les premières lignes?",min=0,max=101,value=0,step=1),
                                       radioButtons("input_fileSep",
                                                    label = "Séparateur",
                                                    choices=c("point-virgule" = ";", "virgule" = ",", "espace" = " ", "tabulation" = "\t", "autre" = "autre"),
@@ -66,10 +67,9 @@ ui = dashboardPage(
     conditionalPanel(condition="input.input_typedata_choice == 'Fichier intégré'",
                      selectInput("input_intdataset",
                                  label="Sélectionner le dataset intégré",
-                                 choices=NULL
+                                 choices=c("click_rates.csv","four_sessions.csv","loan_data.csv","web_page_data.csv")
                      ),
-                     checkboxInput("input_header_file",label = "Noms de variables présents", value = FALSE),
-                     sliderInput("input_fileSkip",label="Ignorer les premières lignes?",min=0,max=101,value=0,step=1)
+                     sliderInput("input_fileSkip_integrate",label="Ignorer les premières lignes?",min=0,max=101,value=0,step=1)
     ),
     
     actionButton("input_valid_button",label="Valider")
@@ -211,13 +211,22 @@ ui = dashboardPage(
                    column(3,
                           uiOutput("input_model_type_bin")
                    ),
-                   column(3,
+                   column(2,
                           uiOutput("input_proportion_bin")
                    ),
-                   column(3,
+                   column(2,
                           uiOutput("input_threshold_bin")
-                   )
+                   ),
+                   column(2,
+                          uiOutput("input_type_unbalanced")
+                   ),
+                   column(1,
+                          uiOutput("input_prop_minclass")
 
+                   ),
+                   column(2,
+                          uiOutput("input_valid_unbalanced")
+                   )
                  ),
                  fluidRow(
                    column(2,
@@ -236,8 +245,9 @@ ui = dashboardPage(
                                      column(2,checkboxInput("input_model_pruned_bin", "Arbre élagué ?", value = FALSE))
                    ),
                    conditionalPanel(condition="input.input_model_type_bin == 'Arbre de décision CHAID'",
-                                    column(2,selectInput("input_model_bins_bin",label="Nombre de bacs pour les quantitatives",choices=1:15,selected=7))
+                                    column(2,selectInput("input_model_bins_bin",label="Nombre de bacs (var. quant.)",choices=1:15,selected=7))
                    )
+
 
                  ),
                  fluidRow(
@@ -276,7 +286,7 @@ ui = dashboardPage(
       )
     ),
   ),
-  # Nom de l'application - JaGo
+  # Nom de l'application - app
   title = "JaGo",
   
 )

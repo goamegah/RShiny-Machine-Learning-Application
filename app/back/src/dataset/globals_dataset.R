@@ -3,9 +3,7 @@ number_click_process=0
 PARAMS=c("Type de variable","Outliers","Normalisation","Dummification")
 
 get_categories = function(df){
-  print("lslssjddj")
   return(sapply(df, function(x) {
-    print("lslsl")
     if (is.integer(x)){
       "quantitative discrète"
     }

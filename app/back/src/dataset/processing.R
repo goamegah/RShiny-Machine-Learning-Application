@@ -22,14 +22,23 @@ process_type = function(df, col_categories) {
 
     } else if (cat == "qualitative nominale") {
       # Clean the column (remove missing values, convert to factor)
+      x=df[[i]][!is.na(df[[i]])]
+      ux <- unique(x)
+      val_mostfreq=ux[which.max(tabulate(match(x, ux)))]
+      df[[i]][is.na(df[[i]])] =as.character(val_mostfreq)
       df[[i]] = as.factor(as.character(df[[i]]))
+
 
     } else if (cat == "qualitative ordinale") {
       # Clean the column (remove missing values, convert to factor)
+      x=df[[i]][!is.na(df[[i]])]
+      ux <- unique(x)
+      val_mostfreq=ux[which.max(tabulate(match(x, ux)))]
+      df[[i]][is.na(df[[i]])] =as.character(val_mostfreq)
       df[[i]] = as.factor(as.character(df[[i]]))
       df[[i]] = factor(df[[i]], ordered = TRUE)
     } else {
-      print("Unknown category, skip the column")
+      stop("Unknown category, skip the column")
       next
     }
   }

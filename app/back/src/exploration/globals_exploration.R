@@ -12,7 +12,7 @@ get_vizualizations=function(cat){
   } else if (cat == "qualitative nominale" || cat == "qualitative ordinale") {
     return(visualization_types$qualitative)
   } else{
-    print("A problem occur!")
+    stop("A problem occur!")
   }
 
 }
@@ -35,7 +35,7 @@ visualization_types_bi = function(cat){
   if (cat == "qualitative nominale" || cat =="qualitative ordinale" ){
     return("qualitative")
   } else{
-    print(paste("A problem occur from visualization_types_bi:",cat))
+    stop(paste("A problem occur from visualization_types_bi:",cat))
   }
 
 
@@ -62,7 +62,7 @@ get_vizualizations_bi=function(cats){
 
   }
   else{
-    print(paste("A problem occur from get_vizualizations_bi:",cats))
+    stop(paste("A problem occur from get_vizualizations_bi:",cats))
   }
 }
 
