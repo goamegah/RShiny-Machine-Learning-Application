@@ -16,6 +16,7 @@ if(! require("comprehenr")) install.packages("comprehenr",repos='http://cran.us.
 if(! require("ROSE")) install.packages("ROSE",repos='http://cran.us.r-project.org')
 if(! require("xlsx")) install.packages("xlsx",repos='http://cran.us.r-project.org')
 if(! require("readxl")) install.packages("readxl",repos='http://cran.us.r-project.org')
+if(! require("rsconnect")) install.packages("rsconnect")
 
 library(comprehenr)
 library(shiny)
@@ -35,6 +36,7 @@ library(pROC)
 library(ROSE)
 library(xlsx)
 library(readxl)
+library(rsconnect)
 
 
 

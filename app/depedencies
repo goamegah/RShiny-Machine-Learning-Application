@@ -1,6 +1,0 @@
-sudo apt-get install libpng-dev
-conda install gxx_linux-64
-apt-get install libcurl4-openssl-dev libssl-dev
-
-
-
