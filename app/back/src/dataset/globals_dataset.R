@@ -1,6 +1,7 @@
 #global variables for dataset panel
 number_click_process=0
 PARAMS=c("Type de variable","Outliers","Normalisation","Dummification")
+LINES=list(click_rates.csv=6,four_sessions.csv=19,loan_data.csv=15,web_page_data.csv=35)
 
 get_categories = function(df){
   return(sapply(df, function(x) {

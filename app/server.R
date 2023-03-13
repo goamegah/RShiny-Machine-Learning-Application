@@ -50,17 +50,15 @@ server = function (input, output, session) {
   # ************************************
 
 
-
   observeEvent(input$input_valid_button,{
-    print(input$input_file$datapath)
-    if (identical(input$input_file$datapath,NULL)){
+    if (identical(input$input_file$datapath,NULL) && input$input_typedata_choice != "Fichier intégré"){
       showModal(modalDialog(
         title = "Erreur",
         "Aucun dataset n'a été chargé",
         easyClose = TRUE
       ))
 
-    }else if (input$input_format=="xlsx (Excel)" && list_reavalues$error_format == TRUE){
+    }else if (input$input_format=="xlsx (Excel)" && list_reavalues$error_format == TRUE && input$input_typedata_choice != "Fichier intégré"){
       showModal(modalDialog(
         title = "Erreur",
         "Le dataset n'a pas été chargé correctement",
@@ -431,33 +429,6 @@ server = function (input, output, session) {
 
 
   observeEvent(input$input_file$datapath, {
-        result_lines_csv=tryCatch({
-          lines=length(readLines(input$input_file$datapath))
-          output$input_fileSkip_csv = renderUI({
-            sliderInput("input_fileSkip_csv",label="Ignorer des lignes?",min=0,max=as.integer(lines),value=0,step=1)
-          })
-        }, warning = function(w) {
-          output$input_fileSkip_csv = renderUI({
-            sliderInput("input_fileSkip_csv",label="Ignorer des lignes?",min=0,max=15,value=0,step=1)
-          })
-          showModal(modalDialog(
-            title = "Warning",
-            paste("Le nombre de ligne du fichier n'a pas pu être trouvé, valeur par défaut:15",w),
-            easyClose = TRUE
-          ))
-        }, error = function(e) {
-          output$input_fileSkip_csv = renderUI({
-            sliderInput("input_fileSkip_csv",label="Ignorer des lignes?",min=0,max=15,value=0,step=1)
-          })
-          showModal(modalDialog(
-            title = "Erreur",
-            paste("Le nombre de ligne du fichier n'a pas pu être trouvé, valeur par défaut:15",e),
-            easyClose = TRUE
-          ))
-        }, finally = {
-        })
-
-
         result = tryCatch({
           file_path=input$input_file$datapath
           sheets_name=excel_sheets(file_path)
@@ -1322,8 +1293,19 @@ server = function (input, output, session) {
     includeHTML(path="./www/doc/doc.html")
   })
   output$input_fileSkip_csv = renderUI({
-    sliderInput("input_fileSkip_csv",label="Ignorer des lignes?",min=0,max=15,value=0,step=1)
+    sliderInput("input_fileSkip_csv",label="Ignorer les premières lignes?",min=0,max=15,value=0,step=1)
   })
+  output$input_fileSkip_integrate = renderUI({
+    sliderInput("input_fileSkip_integrate",label="Ignorer les premières lignes?",
+                min=0,max=LINES[[as.character(input$input_intdataset)]],value=0,step=1)
+  })
+
+
+
+
+
+
+
 
   output$output_table = renderDataTable({
     if(!is.null(list_reavalues$table)) DT::datatable(list_reavalues$table,options = list(scrollX=TRUE))

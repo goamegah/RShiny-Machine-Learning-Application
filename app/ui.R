@@ -78,9 +78,10 @@ ui = dashboardPage(
     conditionalPanel(condition="input.input_typedata_choice == 'Fichier intégré'",
                      selectInput("input_intdataset",
                                  label="Sélectionner le dataset intégré",
-                                 choices=c("click_rates.csv","four_sessions.csv","loan_data.csv","web_page_data.csv")
+                                 choices=c("click_rates.csv","four_sessions.csv","loan_data.csv","web_page_data.csv"),
+                                 selected = "click_rates.csv"
                      ),
-                     sliderInput("input_fileSkip_integrate",label="Ignorer les premières lignes?",min=0,max=101,value=0,step=1)
+                     uiOutput("input_fileSkip_integrate")
     ),
     
     actionButton("input_valid_button",label="Valider")
