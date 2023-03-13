@@ -1,0 +1,139 @@
+
+    <body>
+        <h1>Documentation</h1>
+        <hr>
+        <h2>Introduction</h2>
+            <p>
+                Cette documentation présente l'interface Shiny créée pour l'analyse de données et l'apprentissage de modèles de Machine Learning.
+                <br>Cette application est destinée à des utilisateurs ayant des connaissances en statistiques et en apprentissage automatique.
+            </p>
+
+        <h2>Utilisation de l'interface Shiny</h2>
+        <p>Pour utiliser l'interface Shiny, vous devez suivre les étapes suivantes :</p>
+        <ol>
+            <li>Ouvrir l'application Shiny dans votre navigateur web.</li>
+            <li>Charger le fichier de données à analyser dans l'interface Shiny.</li>
+            <li>Effectuer le pré-traitement des données et l'analyse exploratoire univariée/bivariée.</li>
+            <li>Utiliser les modèles de Machine Learning et effectuer des prédictions.</li>
+        </ol>
+
+        <h2>Composantes de l'interface Shiny</h2>
+        <p>L'interface Shiny est constituée de trois composantes :</p>
+        <ol>
+            <li>Le volet dépliant gauche pour charger le fichier de données.</li>
+            <li>La partie centrale avec un tabpanel contenant trois panels : Dataset, Exploration, Apprentissage de Modèles.</li>
+        </ol>
+
+        <h3>Le volet dépliant gauche</h3>
+        <p>Le volet dépliant gauche permet de charger le fichier de données et d'appliquer des options de chargement. Les options de chargement sont les suivantes :</p>
+        <ol>
+            <li>Séparateur de décimales.</li>
+            <li>Ignorer les premières lignes.</li>
+            <li>etc ...</li>
+        </ol>
+        <p>Il est important de noter que la taille maximale du fichier à charger est de 251 mo. Une fois le fichier de données chargé, il apparaîtra dans le panel Dataset.</p>
+
+        <h3>Dataset panel</h3>
+            <p>Ce panel permet de visualiser les données du dataset chargé ainsi que de choisir les colonnes à étudier et de faire du preprocessing/processing.</p>
+            <h4>Tableau des données</h4>
+                <p>Le tableau des données est affiché contenant le dataset chargé. De plus, chaque colonne peut être filtrée pour afficher seulement les valeurs qui nous intéressent.</p>
+            <h4>Informations sur les colonnes</h4>
+                <p>Un tableau est affiché pour résumer les informations sur chaque colonne : nom, type, nombre de valeurs manquantes...</p>
+            <h4>Choisissez les variables à étudier</h4>
+                <p>Ce bouton permet de sélectionner les variables à étudier dans les onglets suivants. Il est important de ne sélectionner que les variables qui ont du sens pour l'analyse exploratoire et l'apprentissage de modèles.</p>
+            <h4>Opération sur une colonne</h4>
+                <p>
+                    Trois listes déroulantes et un bouton "Valider la catégorie de la variable" ou "Valider la saisie" sont présents:
+                    <ol>
+                        <li>
+                            Ces listes déroulantes servent à modifier une variable parmi les variables à étudier (exemple : supprimer les outliers pour une variable quantitative.)
+                        </li>
+                        <li>
+                            Une fois la selection faite, il faudra impérativement cliquer sur le bouton de validation (tout à droite des listes déroulantes) pour valider l'opération.
+                        </li>
+                        <li>
+                            Si le type d'opération n'est pas compatible avec la variable sélectionnée (liste déroulante :"Choisissez une variable"). L'opération ne sera pas effectuée même après avoir appuyé sur le bouton de validation.
+                        </li>
+                    </ol>
+
+
+                </p>
+            <h4>Faire Preprocessing</h4>
+            <p>
+                Ce bouton permet de faire du preprocessing sur toutes les colonnes avec suppression de valeurs manquantes avec imputation (moyenne/mode selon le type de variable).
+                <br>Et de "caster" le type de variable selon la catégorie (quantitative discrète, quantitative continue, qualitative ordinale, qualitative nominale).
+                <br>Il est important de faire le preprocessing avant de passer à l'analyse exploratoire et l'apprentissage de modèles.
+            </p>
+
+
+        <h3>Exploration panel</h3>
+            <p>
+                Ce panel contient l'analyse exploratoire univariée/ bivariée.
+                <br>L'utilisation est intuitive, il faudra faire d'abord le processing des colonnes avant de rentrer dans ce panel.
+                <br>Les graphiques proposés dans les listes déroulantes sont conditionnées selon la/les catégories de/des variable(s).
+            </p>
+
+
+        <h3>Apprentissage de Modèles panel</h3>
+            <p>
+                Une fois l'analyse exploratoire faite, ce panel concerne l'apprentissage de modèles de classification de ML. Il contient de nombreuses options (choix de la proportion du test set, choix du seuil d'acceptation...).
+            </p>
+            <p>Trois modèles ont été implémentés (Regression Logistique, Arbre de Décision CART, Arbre de Décision CHAID):</p>
+            <ol>
+                <li>
+                    La sélection de modèle est dynamique, c'est-à-dire que certains modèles pour un certain dataset ne seront pas disponibles car les critères sur les colonnes ne sont pas respectés.
+                    <br>Exemple : si on a une feature qualitative, on ne peut pas entraîner un modèle de Regression Logistique.
+                    <br>Donc, à l'affichage, il n'y aura pas de modèle de Regression Logistique disponible.
+                    <br>Il faudra dummifier la variable au préalable via le Dataset panel et sélectionner que des variables quantitatives.
+                </li>
+                <li>
+                    Il y a aussi une liste déroulante "Choisir le type d'équilibrage" avec un curseur "Prop. classe minoritaire" et un bouton "Valider Over/Under sampling".
+                    <br>Ces boutons sont affichés dynamiquement lorsque la variable à prédire pour un modèle de ML est qualitative à 2 MODALITÉS.
+                    <br>Ils servent donc à rééquilibrer le jeu de données en réglant la proportion de lignes de la classe minoritaire qui ne peut pas être plus de 0.5 (50%).
+                </li>
+                <li>Une fois toutes les options choisies, il faudra cliquer sur "Valider les options" pour lancer le calcul du modèle de ML choisi.</li>
+                <li>
+                     Si il n'y a pas de variable qualitative dans le dataset sélectionné via Dataset panel:
+                    <br>Le bouton "Valider les options" et d'autres boutons d'options du modèle de ML ne sont pas affichés.
+                    <br>Car ce sont des modèles de classification et non de régression. L'aspect dynamique du panel a été réfléchi de manière à éviter les erreurs de saisie utilisateur.
+                </li>
+            </ol>
+
+        <style>
+
+
+
+            h1, h2, h3, h4, h5, h6 {
+              color: #3c8dbc;
+            }
+
+            /* Style pour les balises p */
+            p {
+                font-size: 16px;
+                line-height: 1.6;
+                color: #444;
+                margin: 20px 0;
+            }
+
+            /* Style pour les balises li */
+            li {
+                font-size: 16px;
+                line-height: 1.6;
+                color: #444;
+                margin: 10px 0;
+            }
+
+            /* Style pour les balises ul */
+            ol {
+                margin: 10px 0;
+                list-style-type: circle;
+                color: #444;
+            }
+
+
+
+
+        </style>
+
+    </body>
+

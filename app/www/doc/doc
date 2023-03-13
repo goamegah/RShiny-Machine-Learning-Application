@@ -1,0 +1,56 @@
+L'application est constituée de trois composantes:
+    1) Un volet dépliant gauche pour pouvoir charger un fichier qui contient le dataset:
+        - avec des options au chargement du fichier (séparateur de décimales, ignorer les premières lignes...)
+        - un bouton valider pour valider le chargement du fichier (limite maximale du ficher: 251 mo)
+
+    2) La partie centrale qui contient un tabpanel qui contient trois panels:
+
+        2.1) Dataset panel
+            - contient le dataset sous forme d'un tableau
+            - contient un tableau indicant des informations sur les colonnes
+            - contient un premier boutons "Choisissez les variables à étudier":
+                - pour selectionner les variables durant l'étude
+            - contient  3 "selectInput" et bouton "Valider la catégorie de la variable" ou "Valider la saisie":
+                - ces items servent à modifier une variable parmi les variable à étudier
+                  par exemple: supprimer les outliers pour une variable quantitative.
+                  Une fois la selection des "selectInput" faite, il faudra impérativement cliquer sur le bouton
+                  de validation (tout à droite des "selectInput") pour valider l'opération.
+                  ATTENTION: si le type d'opération n'est pas compatible avec
+                  la variable sélectionnée ("selectInput":"Choisissez une variable"), l'opération ne sera pas faite
+                  même après avoir appuyer sur le bouton de validation.
+            - contient tout en bas du panel un bouton "Faire Preprocessing":
+                - Ce bouton supprimera les NaN de toutes les colonnes avec imputation (moyenne/mode selon le type de variable)
+                  Il "castera" le types selon la catégorie de la variable (quantitative discrète,quantitative continue,qualitative ordinale/
+                  qualitative nominale)
+
+
+
+        2.2) Exploration panel
+            - Ce panel contient l'analyse exploratoire univariée/ bivariée
+              l'utilisation est intuitive, il faudra faire d'abord le processing des colonnes avant de
+              rentrer dans ce panel, les graphiques proposés dans les "selectInput" sont conditionnés selon
+              le type des variables.
+
+        2.3) Apprentissage de Modèles panel
+            - Une fois l'analyse exploratoire faite, ce panel concerne l'apprentissage de modèles de ML
+              Il contient de nombreuses options (choix de la proportion du test set, choix du seuil d'acceptation...)
+            - Trois modèles ont été implémentés (Regression Logistique, Arbre de Décision CART, Arbre de Décision CHAID):
+                - La selection de modèle est dynamique c'est à dire que certains modèles pour un certain dataset ne seront
+                  pas disponible car les critères sur les colonnes ne sont pas respectés (exemple: si on a une feature
+                  qualitative, on peut pas entrainer un modèle de Regression Logistique donc à l'affichage il n'y aura
+                  pas de modèle de Regression Logistique disponible, il faudra dummifier la variable au préalable via le
+                  Dataset panel et selectionner que des variables quantitatives.)
+            - Il y a aussi un selectInput "Choisir le type d'équilibrage" avec un curseur "Prop. classe minoritaire"
+            et un bouton "Valider Over/Under sampling":
+                - Ces boutons sont affichés dynamiquement quand la variable à prédire pour un modèle de ML est qualitative
+                  à 2 MODALITÉS. Ils servent donc rééquilibrer le jeux de données un réglant la proportion de lignes de la classe
+                  minoritaire qui ne peut pas être plus de 0.5 (50%)
+                - Une fois toutes les options choisis, il faudra cliquer sur "Valider les options" pour lancer le calcul
+                  du modèle de ML choisis
+            - IMPORTANT: Si il y n'y a pas de variable qualitative dans le dataset selectionné via Dataset panel:
+                - Le bouton "Valider les options" et d'autres boutons d'options du modèle de ML ne sont pas affichés.
+                  Car ce sont des modèles de classification et non de régression. L'aspect dynamique du panel a été réfléchi
+                  de manière à éviter les erreurs de saisie utilisateur.
+
+
+

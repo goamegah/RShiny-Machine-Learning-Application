@@ -14,6 +14,8 @@ if(!require("fastDummies")) install.packages("fastDummies",repos='http://cran.us
 if(!require("pROC")) install.packages("pROC",repos='http://cran.us.r-project.org')
 if(! require("comprehenr")) install.packages("comprehenr",repos='http://cran.us.r-project.org')
 if(! require("ROSE")) install.packages("ROSE",repos='http://cran.us.r-project.org')
+if(! require("xlsx")) install.packages("xlsx",repos='http://cran.us.r-project.org')
+if(! require("readxl")) install.packages("readxl",repos='http://cran.us.r-project.org')
 
 library(comprehenr)
 library(shiny)
@@ -31,6 +33,10 @@ library(rpart.plot)
 library(fastDummies)
 library(pROC)
 library(ROSE)
+library(xlsx)
+library(readxl)
+
+
 
 
 

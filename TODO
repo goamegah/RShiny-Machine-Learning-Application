@@ -1,25 +1,20 @@
 TODO:
 Bonus:
 Faire le graphe des inputs
+
 1. Dataset
 nombre de catégories OK
 / présence d'outliers OK ? / normalisation OK ? / dummification ? OK
 
 
 2. Analyse exploratoire
-BONUS: transformation des "plots standard" en "ggplot".
+    OK
 
 3. Machine Learning
 - Classification Binaire: 
 (*) intégration courbe ROC, AUC. OK
-(*) déséquilibre des classes ?:
+(*) déséquilibre des classes ?: OK
 https://www.kaggle.com/rafjaa/resampling-strategies-for-imbalanced-datasets
-
-
-
-BONUS Global:
-Mécanisme de vérification de la cohérence des entrées utilisateurs.
-
 
 
 Une fois interface fini:

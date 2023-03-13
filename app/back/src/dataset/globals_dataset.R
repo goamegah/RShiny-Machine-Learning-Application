@@ -24,8 +24,8 @@ get_categories = function(df){
       } else {
         "qualitative nominale"
       }
-    } else {
-      "Inconnu"
+    }else{
+     "qualitative nominale"
     }
   }))
 }

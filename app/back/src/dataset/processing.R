@@ -111,3 +111,10 @@ process_dummy = function(df,df_all,df_types,col_categories_all,col_name) {
   col_categories_all[new_colnames]=rep("quantitative discrète",length(new_colnames))
   return(list(table=df,table_all=df_all,type_table=df_types,col_categories_all=col_categories_all))
 }
+
+
+process_columns_xlsx= function(df){
+  vec_missings=sapply(df,function(x){sum(is.na(x))})
+  return(as.data.frame(df[,!vec_missings == nrow(df)]))
+
+}

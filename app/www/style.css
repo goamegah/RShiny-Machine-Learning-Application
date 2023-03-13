@@ -1,3 +1,21 @@
 .output_tables{
        margin-bottom: 21px;
 }
+
+/*
+button#doc_button {
+    width: 201px;
+    background-color: #3c8dbc;
+    line-height: 44px;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-weight: bold;
+    color: #fff;
+    border:none;
+
+}
+*/
+div#input_doc {
+    margin-left: 13px;
+}
+
+

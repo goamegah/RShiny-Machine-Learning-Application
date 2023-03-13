@@ -18,7 +18,7 @@
 
 ui = dashboardPage(
   dashboardHeader(
-    title = ""
+    title = "JaGo"
   ),
   dashboardSidebar(
     # *** Choix du type de données
@@ -33,7 +33,7 @@ ui = dashboardPage(
                      fileInput("input_file", label = "Fichier à importer", placeholder = "Choississez votre fichier"),
                      selectInput("input_format",
                                  label="Sélectionner le format de fichier",
-                                 choices=c("csv")
+                                 choices=c("csv","xlsx (Excel)")
                      ),
 
                      # Sous Condition:
@@ -41,15 +41,12 @@ ui = dashboardPage(
                      # ************************
                      conditionalPanel(condition = "input.input_format == 'csv'",
                                       checkboxInput("input_header_file",label = "Noms de variables présents", value = FALSE),
-                                      sliderInput("input_fileSkip_csv",label="Ignorer les premières lignes?",min=0,max=101,value=0,step=1),
+                                      uiOutput("input_fileSkip_csv"),
                                       radioButtons("input_fileSep",
                                                    label = "Séparateur",
                                                    choices=c("point-virgule" = ";", "virgule" = ",", "espace" = " ", "tabulation" = "\t", "autre" = "autre"),
                                                    selected = ","
                                       ),
-                                      # Sous sous Condition:
-                                      # *** Cas des autres formats de fichiers
-                                      # **************************************
                                       conditionalPanel(condition = "input.input_fileSep == 'autre'",
                                                        textInput("input_fileSepOther", label = "Séparateur")
                                       ),
@@ -59,6 +56,20 @@ ui = dashboardPage(
                                       )
                                       
                                       
+                     ),
+                     conditionalPanel(condition = "input.input_format == 'xlsx (Excel)'",
+                                      uiOutput("input_header_file_xlsx"),
+                                      uiOutput("input_srow_xlsx"),
+                                      uiOutput("input_erow_xlsx"),
+                                      uiOutput("input_sheet_xlsx"),
+                                      conditionalPanel(condition = "input.input_sheet_xlsx == 'number'",
+                                                       uiOutput("input_sheet_value_xlsx")
+                                      ),
+                                      conditionalPanel(condition = "input.input_sheet_xlsx == 'name'",
+                                                       uiOutput("input_sheet_name_xlsx")
+
+                                      )
+
                      )
     ),
     # Condition:
@@ -282,6 +293,12 @@ ui = dashboardPage(
                                 )
 
 
+               )
+      ),
+
+      tabPanel("Documentation",
+               fluidRow(
+                 uiOutput("input_doc")
                )
       )
     ),

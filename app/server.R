@@ -37,250 +37,507 @@ server = function (input, output, session) {
     modify_type=c(0,0), #first:exploration and second:machine learning panel
     modify_features=c(0,0),#first:exploration and second:machine learning panel
     modify_rows=c(0,0), #first: dataset panel and second:machine learning panel
-    modify_outcome_unbalanced=NULL
+    modify_outcome_unbalanced=NULL,
+    error=FALSE,
+    error_format=FALSE,
+    error_csv=FALSE
   )
 
   # Event:
   # *** Gestion des évènements de l'UI
   # - sep : variable séparateur
-  # - personnalFile : variable fichier
+  # - personnalFile : variable qui contient le dataframe
   # ************************************
+
+
+
   observeEvent(input$input_valid_button,{
-    if(input$input_typedata_choice=="Fichier personnel"){
-      # Event:
-      # *** Traitement des fichier CSV
-      # *********************************
-      if(input$input_format=="csv"){
-        if (is.null(input$input_file)) personnalFile=NULL
-        if (input$input_fileSep == 'autre') sep = input$input_fileSepOther
-        else sep = input$input_fileSep
-        file_path=input$input_file$datapath
-        header=input$input_header_file
-        dec=input$input_fileDec
-        skip=input$input_fileSkip_csv
-      }
+    print(input$input_file$datapath)
+    if (identical(input$input_file$datapath,NULL)){
+      showModal(modalDialog(
+        title = "Erreur",
+        "Aucun dataset n'a été chargé",
+        easyClose = TRUE
+      ))
 
+    }else if (input$input_format=="xlsx (Excel)" && list_reavalues$error_format == TRUE){
+      showModal(modalDialog(
+        title = "Erreur",
+        "Le dataset n'a pas été chargé correctement",
+        easyClose = TRUE
+      ))
 
     }
-    if(input$input_typedata_choice=="Fichier intégré"){
-      file_name=input$input_intdataset
-      file_path=paste("./data/datasets",file_name,sep="/")
-      header=TRUE
-      dec="."
-      skip=input$input_fileSkip_integrate
-      sep=","
+    else{
+      list_reavalues$error=FALSE
+      list_reavalues$error_csv=FALSE
+      if(input$input_typedata_choice=="Fichier personnel"){
+        # Event:
+        # *** Traitement des fichier CSV
+        # *********************************
+        if(input$input_format=="csv"){
+          if (is.null(input$input_file)) personnalFile=NULL
+          if (input$input_fileSep == 'autre') sep = input$input_fileSepOther
+          else sep = input$input_fileSep
+          file_path=input$input_file$datapath
+          header=input$input_header_file
+          dec=input$input_fileDec
+          skip=input$input_fileSkip_csv
+        }
+        else if(input$input_format=="xlsx (Excel)"){
+          file_path=input$input_file$datapath
+          header=input$input_header_file_xlsx
+          if(! identical(input$input_srow_xlsx,NULL)){
+            if(is.na(as.numeric(input$input_srow_xlsx)))
+            {
+              showModal(modalDialog(
+                title = "Erreur",
+                "Numéro de la ligne de départ doit être un nombre entier",
+                easyClose = TRUE
+              ))
+              list_reavalues$error=TRUE
+            }
+          }else{
+            showModal(modalDialog(
+              title = "Erreur",
+              "Mauvaise saisie du numéro de la ligne de départ",
+              easyClose = TRUE
+            ))
+            list_reavalues$error=TRUE
+          }
+          if(list_reavalues$error==FALSE){
+
+            if(! identical(input$input_erow_xlsx,NULL)){
+              if(input$input_erow_xlsx == ""){
+              }
+              else if(is.na(as.numeric(input$input_erow_xlsx))){
+                showModal(modalDialog(
+                  title = "Erreur",
+                  "Numéro de la ligne de fin doit être un nombre entier",
+                  easyClose = TRUE
+                ))
+                list_reavalues$error=TRUE
+              }else if (as.integer(input$input_erow_xlsx) < as.integer(input$input_srow_xlsx)){
+                showModal(modalDialog(
+                  title = "Erreur",
+                  "Numéro de la ligne de fin doit être >= Numéro de la ligne de départ",
+                  easyClose = TRUE
+                ))
+                list_reavalues$error=TRUE
+              }
+
+            }else{
+              showModal(modalDialog(
+                title = "Erreur",
+                "Mauvaise saisie du numéro de la ligne de fin",
+                easyClose = TRUE
+              ))
+              list_reavalues$error=TRUE
+            }
+          }
+
+        }
+
+      }
+
+      if (list_reavalues$error ==FALSE){
+        if(input$input_typedata_choice=="Fichier intégré"){
+          file_name=input$input_intdataset
+          file_path=paste("./data/datasets",file_name,sep="/")
+          header=TRUE
+          dec="."
+          skip=input$input_fileSkip_integrate
+          sep=","
+        }
+        try({
+          if(input$input_format != "xlsx (Excel)"){
+            personnalFile = tryCatch({
+              read.table(
+                file_path,
+                header = header,
+                sep = sep,
+                dec = dec ,
+                skip = skip,
+                stringsAsFactors = FALSE)
+            }, warning = function(w) {
+              read.table(
+                file_path,
+                header = header,
+                sep = sep,
+                dec = dec ,
+                skip = skip,
+                stringsAsFactors = FALSE)
+            }, error = function(e) {
+              showModal(modalDialog(
+                title = "Erreur lors du chargement du fichier csv",
+                paste("Le fichier n'a pas été chargé correctement: ",e),
+                easyClose = TRUE
+              ))
+              list_reavalues$error_csv=TRUE
+
+            }, finally = {
+
+            })
+
+          }else{
+
+            if (input$input_erow_xlsx==""){
+              end.row=NULL
+            }else{
+              end.row=as.integer(input$input_erow_xlsx)
+            }
+            if(input$input_sheet_xlsx =="name"){
+              personnalFile=as.data.frame(read.xlsx(file_path,sheetName=as.character(input$input_sheet_name_xlsx),
+                                                    header=as.logical(input$input_header_file_xlsx),
+                                                    startRow=as.integer(input$input_srow_xlsx),
+                                                    endRow=end.row))
+            }else if(input$input_sheet_xlsx =="number"){
+              personnalFile=as.data.frame(read.xlsx(file_path,sheetIndex=as.integer(input$input_sheet_value_xlsx),
+                                                    header=as.logical(input$input_header_file_xlsx),
+                                                    startRow=as.integer(input$input_srow_xlsx),
+                                                    endRow=end.row))
+            }
+            personnalFile=process_columns_xlsx(personnalFile) #remove columns which contains only NA values
+
+
+          }
+          if(nrow(personnalFile) == 0){
+            showModal(modalDialog(
+              title = "Erreur",
+              "Le dataset chargé ne contient pas de lignes !",
+              easyClose = TRUE
+            ))
+
+
+          }
+
+
+          if (list_reavalues$error_csv == FALSE && (nrow(personnalFile) > 0)){
+            list_reavalues$table_all=personnalFile
+            list_reavalues$table=data.frame(list_reavalues$table_all)
+            list_reavalues$col_categories_all=get_categories(list_reavalues$table_all)
+            list_reavalues$col_categories=get_categories(list_reavalues$table)
+
+            list_reavalues$type_table=data.frame(variable = colnames(list_reavalues$table), type = sapply(list_reavalues$table, function(x){get_type_columns(x)}),
+                                                 category=list_reavalues$col_categories,modality=sapply(list_reavalues$table,function(x){length(unique(x))}),
+                                                 missing_values=sapply(list_reavalues$table,function(x){sum(is.na(x))}))
+            colnames(list_reavalues$type_table)[5]="Number of Missing Values"
+            colnames(list_reavalues$type_table)[4]="Number of Modalities"
+
+            rownames(list_reavalues$type_table)=NULL
+
+
+            col_names=names(list_reavalues$table)
+            names(list_reavalues$modify_type)=c("Exploration","Apprentissage de Modèles")
+            names(list_reavalues$modify_features)=c("Exploration","Apprentissage de Modèles")
+            names(list_reavalues$modify_rows)=c("Dataset","Apprentissage de Modèles")
+            # Ajout dans la zone prévu le nom des vars. comme option
+            output$input_varschoice=renderUI({
+              selectInput(
+                "input_varschoice",
+                label="Choisissez les variables à étudier",
+                choices=cbind("#Toutes",col_names),
+                selected = "#Toutes",
+                multiple = TRUE)
+            })
+            output$input_varchoice=renderUI({
+              selectInput("input_varchoice",
+                          label="Choisissez une variable",
+                          choices=col_names,
+                          selected = col_names[1])
+            })
+            output$input_type_process=renderUI({
+              selectInput("input_type_process",
+                          label="Paramètres Dataset",
+                          choices=PARAMS,
+                          selected=PARAMS[1])
+            })
+
+            output$input_type_varchoice=renderUI({
+              selectInput("input_type_varchoice",
+                          label="Choisissez la catégorie de la variable",
+                          choices=c("quantitative discrète","quantitative continue","qualitative ordinale","qualitative nominale"),
+                          selected="quantitative discrète")
+            })
+            output$input_valid_type=renderUI({
+              actionButton("input_valid_type",
+                           label="Valider la catégorie de la variable")
+            })
+
+            output$input_var_outliers=renderUI({
+              checkboxInput("input_var_outliers",
+                            "Supprimer les outliers",
+                            value = FALSE)
+            })
+            output$input_valid_outliers=renderUI({
+              actionButton("input_valid_outliers",
+                           label="Valider la Saisie")
+            })
+
+            output$input_var_normalize=renderUI({
+              checkboxInput("input_var_normalize",
+                            "Normaliser la Variable",
+                            value = FALSE)
+            })
+            output$input_valid_normalize=renderUI({
+              actionButton("input_valid_normalize",
+                           label="Valider la Saisie")
+            })
+
+
+            output$input_var_dummy=renderUI({
+              checkboxInput("input_var_dummy",
+                            "Dumifier la Variable",
+                            value = FALSE)
+            })
+            output$input_valid_dummy=renderUI({
+              actionButton("input_valid_dummy",
+                           label="Valider la Saisie")
+            })
+
+
+            output$input_process=renderUI({
+              actionButton("input_process",
+                           label="Faire Preprocessing")
+            })
+
+            #-------------------------------------------------------------------------------------------#
+            output$input_valid_exp=renderUI({
+              actionButton("input_valid_exp",
+                           label="Valider les options")
+
+            })
+            output$input_exp_type=renderUI({
+              selectInput("input_exp_type",
+                          label="Choisissez le type d'exploration",
+                          choices=c("Univariée","Bivariée"),
+                          selected = "Univariée"
+              )
+            })
+
+            output$input_uni_select_var=renderUI({
+              selectInput("input_uni_select_var",
+                          label="Selectionner votre variable",
+                          choices=col_names,
+                          selected =input$input_varchoice )
+            })
+            output$input_bi_select_var=renderUI({
+              selectizeInput("input_bi_select_var",
+                             label="Selectionner vos deux variables (x resp y)",
+                             choices=col_names,
+                             multiple=TRUE,
+                             options = list(maxItems = 2),
+                             selected =list_reavalues$col_names[1])
+            })
+            #-------------------------------------------------------------------------------------------#
+            output$input_model_type=renderUI({
+              selectInput("input_model_type",
+                          label="Choix du type de modèle",
+                          choices=c("Classification Binaire"),
+                          selected ="Classification Binaire")
+            })
+            output$input_proportion_bin=renderUI({
+              sliderInput("input_proportion_bin",
+                          label="Choisir la proportion pour le train Dataset",
+                          min=0.01,
+                          max=1,
+                          value=0.7,
+                          step=0.01)
+            })
+            output$input_threshold_bin=renderUI({
+              sliderInput("input_threshold_bin",
+                          label="Choisir le seuil d'acceptation (probabilités)",
+                          min=0,
+                          max=1,
+                          value=0.5,
+                          step=0.01)
+            })
+
+            qualitative_vars=list_reavalues$type_table %>%
+              filter(category == "qualitative ordinale" | category == "qualitative nominale" ) %>%
+              select(variable)
+            qualitative_vars=qualitative_vars[["variable"]]
+            features=setdiff(list_reavalues$type_table[["variable"]],qualitative_vars[1])
+            col_categoris_who_outco=list_reavalues$col_categories[!names(list_reavalues$col_categories) %in% c(qualitative_vars[1])]
+            features_quant=features[col_categoris_who_outco %in% c("quantitative continue","quantitative discrète")]
+            if (length(features) != length(features_quant)){
+              modeles_type=MODELES_BIN[!MODELES_BIN %in% c("Régression Logistique")]
+              output$input_model_type_bin=renderUI({
+                selectInput("input_model_type_bin",
+                            label="Selectionner votre modèle",
+                            choices=modeles_type,
+                            selected =modeles_type[1])
+              })
+            }else{
+              output$input_model_type_bin=renderUI({
+                selectInput("input_model_type_bin",
+                            label="Selectionner votre modèle",
+                            choices=MODELES_BIN,
+                            selected =MODELES_BIN[1])
+              })
+            }
+
+            if (length(features) && length(qualitative_vars)){
+              modality_outcome=unique(list_reavalues$table[qualitative_vars[1]])
+              output$input_model_outcome_bin=renderUI({
+                selectInput("input_model_outcome_bin",
+                            label="Variable à prédire",
+                            choices=qualitative_vars,
+                            selected =qualitative_vars[1])
+              })
+              output$input_model_poschoice_bin=renderUI({
+                selectInput("input_model_poschoice_bin",
+                            label="Choix de la modalité positive",
+                            choices=modality_outcome,
+                            selected =modality_outcome[1])
+              })
+              output$input_model_features_bin=renderUI({
+                selectizeInput("input_model_features_bin",
+                               label="Selectionner vos features",
+                               choices=features,
+                               multiple=TRUE,
+                               options = list(maxItems = length(features)),
+                               selected =features[1])
+              })
+              output$input_valid_model_bin=renderUI({
+                actionButton("input_valid_model_bin",
+                             label="Valider les options")
+              })
+
+            }else{
+              output$input_model_poschoice_bin=renderUI({
+              })
+              output$input_model_features_bin=renderUI({
+              })
+              output$input_valid_model_bin=renderUI({
+              })
+              output$input_model_outcome_bin=renderUI({
+              })
+            }
+
+          }
+
+
+
+        }, silent = TRUE)
+
+      }
+
     }
-    try({
-      personnalFile=read.table(
-        file_path,
-        header = header,
-        sep = sep,
-        dec = dec ,
-        skip = skip,
-        stringsAsFactors = FALSE)
-      list_reavalues$table_all=personnalFile
-      list_reavalues$table=data.frame(list_reavalues$table_all)
-      list_reavalues$col_categories_all=get_categories(list_reavalues$table_all)
-      list_reavalues$col_categories=get_categories(list_reavalues$table)
 
-      list_reavalues$type_table=data.frame(variable = colnames(list_reavalues$table), type = sapply(list_reavalues$table, function(x){get_type_columns(x)}),
-                                           category=list_reavalues$col_categories,modality=sapply(list_reavalues$table,function(x){length(unique(x))}))
-      colnames(list_reavalues$type_table)[4]="Number of Modalities"
-      rownames(list_reavalues$type_table)=NULL
-
-      number_click_process=0 #initialization of process
-
-      col_names=names(list_reavalues$table)
-      names(list_reavalues$modify_type)=c("Exploration","Apprentissage de Modèles")
-      names(list_reavalues$modify_features)=c("Exploration","Apprentissage de Modèles")
-      names(list_reavalues$modify_rows)=c("Dataset","Apprentissage de Modèles")
-      # Ajout dans la zone prévu le nom des vars. comme option
-      output$input_varschoice=renderUI({
-        selectInput(
-          "input_varschoice",
-          label="Choisissez les variables à étudier",
-          choices=cbind("#Toutes",col_names),
-          selected = "#Toutes",
-          multiple = TRUE)
-      })
-      output$input_varchoice=renderUI({
-        selectInput("input_varchoice",
-                    label="Choisissez une variable",
-                    choices=col_names,
-                    selected = col_names[1])
-      })
-      output$input_type_process=renderUI({
-        selectInput("input_type_process",
-                    label="Paramètres Dataset",
-                    choices=PARAMS,
-                    selected=PARAMS[1])
-      })
-
-      output$input_type_varchoice=renderUI({
-        selectInput("input_type_varchoice",
-                    label="Choisissez la catégorie de la variable",
-                    choices=c("quantitative discrète","quantitative continue","qualitative ordinale","qualitative nominale"),
-                    selected="quantitative discrète")
-      })
-      output$input_valid_type=renderUI({
-        actionButton("input_valid_type",
-                     label="Valider la catégorie de la variable")
-      })
-
-      output$input_var_outliers=renderUI({
-        checkboxInput("input_var_outliers",
-                      "Supprimer les outliers",
-                      value = FALSE)
-      })
-      output$input_valid_outliers=renderUI({
-        actionButton("input_valid_outliers",
-                     label="Valider la Saisie")
-      })
-
-      output$input_var_normalize=renderUI({
-        checkboxInput("input_var_normalize",
-                      "Normaliser la Variable",
-                      value = FALSE)
-      })
-      output$input_valid_normalize=renderUI({
-        actionButton("input_valid_normalize",
-                     label="Valider la Saisie")
-      })
-
-
-      output$input_var_dummy=renderUI({
-        checkboxInput("input_var_dummy",
-                      "Dumifier la Variable",
-                      value = FALSE)
-      })
-      output$input_valid_dummy=renderUI({
-        actionButton("input_valid_dummy",
-                     label="Valider la Saisie")
-      })
-
-
-      output$input_process=renderUI({
-        actionButton("input_process",
-                     label="Faire le processing des colonnes non modifiées")
-      })
-
-      #-------------------------------------------------------------------------------------------#
-      output$input_valid_exp=renderUI({
-        actionButton("input_valid_exp",
-                     label="Valider les options")
-
-      })
-      output$input_exp_type=renderUI({
-        selectInput("input_exp_type",
-                    label="Choisissez le type d'exploration",
-                    choices=c("Univariée","Bivariée"),
-                    selected = "Univariée"
-        )
-      })
-
-      output$input_uni_select_var=renderUI({
-        selectInput("input_uni_select_var",
-                    label="Selectionner votre variable",
-                    choices=col_names,
-                    selected =input$input_varchoice )
-      })
-      output$input_bi_select_var=renderUI({
-        selectizeInput("input_bi_select_var",
-                       label="Selectionner vos deux variables (x resp y)",
-                       choices=col_names,
-                       multiple=TRUE,
-                       options = list(maxItems = 2),
-                       selected =list_reavalues$col_names[1])
-      })
-      #-------------------------------------------------------------------------------------------#
-      output$input_model_type=renderUI({
-        selectInput("input_model_type",
-                    label="Choix du type de modèle",
-                    choices=c("Classification Binaire"),
-                    selected ="Classification Binaire")
-      })
-      output$input_proportion_bin=renderUI({
-        sliderInput("input_proportion_bin",
-                    label="Choisir la proportion pour le train Dataset",
-                    min=0.01,
-                    max=1,
-                    value=0.7,
-                    step=0.01)
-      })
-      output$input_threshold_bin=renderUI({
-        sliderInput("input_threshold_bin",
-                    label="Choisir le seuil d'acceptation (probabilités)",
-                    min=0,
-                    max=1,
-                    value=0.5,
-                    step=0.01)
-      })
-
-      qualitative_vars=list_reavalues$type_table %>%
-        filter(category == "qualitative ordinale" | category == "qualitative nominale" ) %>%
-        select(variable)
-      qualitative_vars=qualitative_vars[["variable"]]
-      features=setdiff(list_reavalues$type_table[["variable"]],qualitative_vars[1])
-      col_categoris_who_outco=list_reavalues$col_categories[!names(list_reavalues$col_categories) %in% c(qualitative_vars[1])]
-      features_quant=features[col_categoris_who_outco %in% c("quantitative continue","quantitative discrète")]
-      if (length(features) != length(features_quant)){
-        modeles_type=MODELES_BIN[!MODELES_BIN %in% c("Régression Logistique")]
-        output$input_model_type_bin=renderUI({
-          selectInput("input_model_type_bin",
-                      label="Selectionner votre modèle",
-                      choices=modeles_type,
-                      selected =modeles_type[1])
-        })
-      }else{
-        output$input_model_type_bin=renderUI({
-          selectInput("input_model_type_bin",
-                      label="Selectionner votre modèle",
-                      choices=MODELES_BIN,
-                      selected =MODELES_BIN[1])
-        })
-      }
-
-      if (length(features) && length(qualitative_vars)){
-        modality_outcome=unique(list_reavalues$table[qualitative_vars[1]])
-        output$input_model_outcome_bin=renderUI({
-          selectInput("input_model_outcome_bin",
-                      label="Variable à prédire",
-                      choices=qualitative_vars,
-                      selected =qualitative_vars[1])
-        })
-        output$input_model_poschoice_bin=renderUI({
-          selectInput("input_model_poschoice_bin",
-                      label="Choix de la modalité positive",
-                      choices=modality_outcome,
-                      selected =modality_outcome[1])
-        })
-        output$input_model_features_bin=renderUI({
-          selectizeInput("input_model_features_bin",
-                         label="Selectionner vos features",
-                         choices=features,
-                         multiple=TRUE,
-                         options = list(maxItems = length(features)),
-                         selected =features[1])
-        })
-        output$input_valid_model_bin=renderUI({
-          actionButton("input_valid_model_bin",
-                       label="Valider les options")
-        })
-
-      }else{
-        output$input_model_poschoice_bin=renderUI({
-        })
-        output$input_model_features_bin=renderUI({
-        })
-        output$input_valid_model_bin=renderUI({
-        })
-        output$input_model_outcome_bin=renderUI({
-        })
-      }
-
-
-    }, silent = TRUE)
   })
+
+
+
+
+  observeEvent(input$input_file$datapath, {
+        result_lines_csv=tryCatch({
+          lines=length(readLines(input$input_file$datapath))
+          output$input_fileSkip_csv = renderUI({
+            sliderInput("input_fileSkip_csv",label="Ignorer des lignes?",min=0,max=as.integer(lines),value=0,step=1)
+          })
+        }, warning = function(w) {
+          output$input_fileSkip_csv = renderUI({
+            sliderInput("input_fileSkip_csv",label="Ignorer des lignes?",min=0,max=15,value=0,step=1)
+          })
+          showModal(modalDialog(
+            title = "Warning",
+            paste("Le nombre de ligne du fichier n'a pas pu être trouvé, valeur par défaut:15",w),
+            easyClose = TRUE
+          ))
+        }, error = function(e) {
+          output$input_fileSkip_csv = renderUI({
+            sliderInput("input_fileSkip_csv",label="Ignorer des lignes?",min=0,max=15,value=0,step=1)
+          })
+          showModal(modalDialog(
+            title = "Erreur",
+            paste("Le nombre de ligne du fichier n'a pas pu être trouvé, valeur par défaut:15",e),
+            easyClose = TRUE
+          ))
+        }, finally = {
+        })
+
+
+        result = tryCatch({
+          file_path=input$input_file$datapath
+          sheets_name=excel_sheets(file_path)
+          sheets_number=1:length(sheets_name)
+          output$input_sheet_value_xlsx=renderUI({
+            selectInput("input_sheet_value_xlsx",
+                        label="Choisir le numéro de la feuille",
+                        choices=sheets_number,
+                        selected=sheets_number[1]
+            )
+          })
+          output$input_sheet_name_xlsx=renderUI({
+            selectInput("input_sheet_name_xlsx",
+                        label="Saisir le nom de la feuille",
+                        choices=sheets_name,
+                        selected = sheets_name[1]
+            )
+
+          })
+          output$input_sheet_xlsx=renderUI({
+            radioButtons("input_sheet_xlsx",
+                         label = "Identification de la feuille",
+                         c("Par Nom" = "name", "Par Numéro" = "number")
+            )
+          })
+          output$input_erow_xlsx=renderUI({
+            textInput("input_erow_xlsx",
+                      label="Numéro de la ligne de fin (laissez la case vide pour avoir toutes les lignes)",
+                      value=""
+            )
+          })
+          output$input_srow_xlsx=renderUI({
+            textInput("input_srow_xlsx",
+                      label="Numéro de la ligne de départ",
+                      value=1
+            )
+          })
+
+          output$input_header_file_xlsx=renderUI({
+            checkboxInput("input_header_file_xlsx",label = "Noms de variables présents", value = FALSE)
+
+          })
+          list_reavalues$error_format=FALSE
+        }, warning = function(w) {
+
+        }, error = function(e) {
+          if (input$input_format == "xlsx (Excel)"){
+            showModal(modalDialog(
+              title = "Erreur lors du chargement du fichier",
+              paste("Une erreur lors du chargement du fichier,le fichier semble ne pas être au bon format: ",e),
+              easyClose = TRUE
+            ))
+
+          }
+          list_reavalues$error_format=TRUE
+          print("lzlzlzl")
+          output$input_sheet_value_xlsx=renderUI({
+          })
+          output$input_sheet_name_xlsx=renderUI({
+          })
+          output$input_sheet_xlsx=renderUI({
+          })
+          output$input_erow_xlsx=renderUI({
+          })
+          output$input_srow_xlsx=renderUI({
+          })
+          output$input_header_file_xlsx=renderUI({
+          })
+
+        }, finally = {
+
+        })
+
+  },ignoreNULL = TRUE,ignoreInit = TRUE)
+
+
+
+
+
+
 
   # Event:
   # *** évenement ou l'utilisateur choisit des features
@@ -291,7 +548,9 @@ server = function (input, output, session) {
       indices_col = match(input$input_varschoice, names(list_reavalues$col_categories_all))
       list_reavalues$col_categories=list_reavalues$col_categories_all[indices_col]
       list_reavalues$type_table=data.frame(variable = colnames(list_reavalues$table), type = sapply(list_reavalues$table, function(x){get_type_columns(x)}),
-                                           category=list_reavalues$col_categories,modality=sapply(list_reavalues$table,function(x){length(unique(x))}))
+                                           category=list_reavalues$col_categories,modality=sapply(list_reavalues$table,function(x){length(unique(x))}),
+                                           missing_values=sapply(list_reavalues$table,function(x){sum(is.na(x))}))
+      colnames(list_reavalues$type_table)[5]="Number of Missing Values"
       colnames(list_reavalues$type_table)[4]="Number of Modalities"
       rownames(list_reavalues$type_table) = NULL
 
@@ -306,7 +565,9 @@ server = function (input, output, session) {
       list_reavalues$table=data.frame(list_reavalues$table_all)
       list_reavalues$col_categories=list_reavalues$col_categories_all
       list_reavalues$type_table=data.frame(variable = colnames(list_reavalues$table), type = sapply(list_reavalues$table, function(x){get_type_columns(x)}),
-                                           category=list_reavalues$col_categories,modality=sapply(list_reavalues$table,function(x){length(unique(x))}))
+                                           category=list_reavalues$col_categories,modality=sapply(list_reavalues$table,function(x){length(unique(x))}),
+                                           missing_values=sapply(list_reavalues$table,function(x){sum(is.na(x))}))
+      colnames(list_reavalues$type_table)[5]="Number of Missing Values"
       colnames(list_reavalues$type_table)[4]="Number of Modalities"
       rownames(list_reavalues$type_table) = NULL
       col_names=names(list_reavalues$table)
@@ -557,7 +818,9 @@ server = function (input, output, session) {
     list_reavalues$col_categories_all[col_select]=col_category
     list_reavalues$col_categories[col_select]=col_category
     list_reavalues$type_table=data.frame(variable = colnames(list_reavalues$table), type = sapply(list_reavalues$table, function(x){get_type_columns(x)}),
-                                           category=list_reavalues$col_categories,modality=sapply(list_reavalues$table,function(x){length(unique(x))}))
+                                           category=list_reavalues$col_categories,modality=sapply(list_reavalues$table,function(x){length(unique(x))}),
+                                         missing_values=sapply(list_reavalues$table,function(x){sum(is.na(x))}))
+    colnames(list_reavalues$type_table)[5]="Number of Missing Values"
     colnames(list_reavalues$type_table)[4]="Number of Modalities"
     list_reavalues$modify_type=list_reavalues$modify_type+1
   },ignoreNULL = TRUE,ignoreInit = TRUE)
@@ -632,12 +895,15 @@ server = function (input, output, session) {
 
 
   observeEvent(input$input_process, {
-    number_click_process=number_click_process+1
-    if (number_click_process == 1){
-      list_reavalues$table_all=process_type(list_reavalues$table_all,list_reavalues$col_categories_all)
-    }
+    list_reavalues$table_all=process_type(list_reavalues$table_all,list_reavalues$col_categories_all)
     list_reavalues$table=process_type(list_reavalues$table,list_reavalues$col_categories)
-    list_reavalues$type_table=data.frame(variable = colnames(list_reavalues$table),type=sapply(list_reavalues$table,function(x){get_type_columns(x)}), category = list_reavalues$col_categories,modality=sapply(list_reavalues$table,function(x){length(unique(x))}))
+    list_reavalues$table=process_type(list_reavalues$table,list_reavalues$col_categories)
+    list_reavalues$type_table=data.frame(variable = colnames(list_reavalues$table),
+                                         type=sapply(list_reavalues$table,function(x){get_type_columns(x)}),
+                                         category = list_reavalues$col_categories,
+                                         modality=sapply(list_reavalues$table,function(x){length(unique(x))}),
+                                         missing_values=sapply(list_reavalues$table,function(x){sum(is.na(x))}))
+    colnames(list_reavalues$type_table)[5]="Number of Missing Values"
     colnames(list_reavalues$type_table)[4]="Number of Modalities"
   },ignoreNULL = TRUE,ignoreInit = TRUE)
 
@@ -951,7 +1217,9 @@ server = function (input, output, session) {
         list_reavalues$table=as.data.frame(list_reavalues$table_all[input$input_varschoice])
       }
       list_reavalues$type_table=data.frame(variable = colnames(list_reavalues$table), type = sapply(list_reavalues$table, function(x){get_type_columns(x)}),
-                                           category=list_reavalues$col_categories,modality=sapply(list_reavalues$table,function(x){length(unique(x))}))
+                                           category=list_reavalues$col_categories,modality=sapply(list_reavalues$table,function(x){length(unique(x))}),
+                                           missing_values=sapply(list_reavalues$table,function(x){sum(is.na(x))}))
+      colnames(list_reavalues$type_table)[5]="Number of Missing Values"
       colnames(list_reavalues$type_table)[4]="Number of Modalities"
       rownames(list_reavalues$type_table) = NULL
       #------------------------------------------------------------------#
@@ -1050,12 +1318,22 @@ server = function (input, output, session) {
   },ignoreNULL = TRUE,ignoreInit = TRUE)
 
 
+  output$input_doc=  renderUI({
+    includeHTML(path="./www/doc/doc.html")
+  })
+  output$input_fileSkip_csv = renderUI({
+    sliderInput("input_fileSkip_csv",label="Ignorer des lignes?",min=0,max=15,value=0,step=1)
+  })
+
   output$output_table = renderDataTable({
     if(!is.null(list_reavalues$table)) DT::datatable(list_reavalues$table,options = list(scrollX=TRUE))
   })
   output$output_type_table = renderDataTable({
     if(!is.null(list_reavalues$type_table)) DT::datatable(list_reavalues$type_table,options = list(scrollX=TRUE,scrollY="251px"))
   })
+
+
+
 
 
 }
