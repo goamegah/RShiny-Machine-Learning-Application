@@ -1,7 +1,4 @@
 TODO:
-Bonus:
-Faire le graphe des inputs
-
 1. Dataset
 nombre de catégories OK
 / présence d'outliers OK ? / normalisation OK ? / dummification ? OK
@@ -18,6 +15,6 @@ https://www.kaggle.com/rafjaa/resampling-strategies-for-imbalanced-datasets
 
 
 Une fois interface fini:
-Faire une étude complète d'un dataset fixé:
-(b) Entraı̂nez vos modèles sur vos données et faites leur évaluation.
-(d) Identifiez les features les plus importants.
+Faire une étude complète d'un dataset fixé: OK
+(b) Entraı̂nez vos modèles sur vos données et faites leur évaluation. OK
+(d) Identifiez les features les plus importants. OK

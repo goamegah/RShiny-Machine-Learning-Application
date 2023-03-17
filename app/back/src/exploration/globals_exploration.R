@@ -47,7 +47,7 @@ get_vizualizations_bi=function(cats){
   catgen1=visualization_types_bi(cats[1])
   catgen2=visualization_types_bi(cats[2])
   if (catgen1 == "quantitative" && catgen2 == "quantitative"){
-    return(c(viz_global,c("Statistiques","Boite à Moustaches","TreeMap","Nuage de points")))
+    return(c(viz_global,c("Statistiques","Boite à Moustaches","TreeMap","Nuage de points","Corrélations")))
   }
   if (catgen1 == "qualitative" && catgen2 == "qualitative"){
     return(viz_global)

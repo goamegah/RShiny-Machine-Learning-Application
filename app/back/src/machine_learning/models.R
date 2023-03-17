@@ -1,3 +1,5 @@
+
+
 plot_tree_model=function(model,name){
   if(name=="Arbre de décision CART"){
     return(rpart.plot(model,roundint = FALSE))
@@ -14,7 +16,7 @@ decision_tree_model = function(df, outcome,col_categories, method, prop=0.7, pru
   #hypothesis: if method=="CHAID", all predictors variable are qualitative
 
   # Split data into training and test sets
-  if(method == "CHAID") df[,-match(outcome,colnames(df))]=discretization_cols(df[-match(outcome,colnames(df))],col_categories[-match(outcome,colnames(df))],nbins)
+  if(method == "CHAID") df[, -match(outcome, colnames(df))]=discretization_cols(df[-match(outcome, colnames(df))], col_categories[-match(outcome, colnames(df))], nbins)
   train = sample(nrow(df), round(prop*nrow(df)), replace = FALSE)
   train_df = df[train,]
   test_df = df[-train,]
@@ -25,7 +27,7 @@ decision_tree_model = function(df, outcome,col_categories, method, prop=0.7, pru
       mutate_at(colnames(train_df), as.factor)
     test_df = test_df %>%
       mutate_at(colnames(test_df), as.factor)
-    tree_model = chaid(as.formula(paste(outcome,"~.")), data = train_df)
+    tree_model = chaid(as.formula(paste(outcome, "~.")), data = train_df)
   } else if (method == "CART") {
     tree_model = rpart(as.formula(paste(outcome, "~.")), data = train_df,method = "class")
     if(prune) {

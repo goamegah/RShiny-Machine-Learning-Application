@@ -66,6 +66,8 @@ process_outliers = function(df,df_all,df_types, col_name, k = 1.5) {
   df_all=as.data.frame(df_all[col >= lower_limit & col <= upper_limit,])
   colnames(df_all)=col_names_all
   df_types[,"Number of Modalities"]=sapply(df,function(x){length(unique(x))})
+  df_types[,"Number of Missing Values"]=sapply(df,function(x){sum(is.na(x))})
+
   return(list(table=df,table_all=df_all,type_table=df_types))
 }
 
@@ -86,7 +88,7 @@ process_normalize = function(df,df_all,df_types,col_categories_all,col_name, met
   df[[col_name]] = as.numeric(col)
   df_all[[col_name]] = as.numeric(col)
   df_types[df_types["variable"]==col_name,]=c(col_name,class(df[[col_name]]),
-                                              "quantitative continue",length(unique(df[[col_name]])))
+                                              "quantitative continue",length(unique(df[[col_name]])),sapply(df[[col_name]],function(x){sum(is.na(x))}))
   col_categories_all[col_name]="quantitative continue"
   return(list(table=df,table_all=df_all,type_table=df_types,col_categories_all=col_categories_all))
 }
@@ -104,7 +106,9 @@ process_dummy = function(df,df_all,df_types,col_categories_all,col_name) {
   new_colnames=gsub(" ","",new_colnames)
   df_newcols=data.frame(variable=new_colnames,type=sapply(df[new_colnames],function(x){get_type_columns(x)}),
                         category=rep("quantitative discrète",length(new_colnames)),
-                        modality=sapply(df[new_colnames],function(x){length(unique(x))}))
+                        modality=sapply(df[new_colnames],function(x){length(unique(x))}),
+                        missing_values=sapply(df[new_colnames],function(x){sum(is.na(x))}))
+  colnames(df_newcols)[5]="Number of Missing Values"
   colnames(df_newcols)[4]="Number of Modalities"
   rownames(df_newcols)=NULL
   df_types=rbind(df_types,df_newcols)

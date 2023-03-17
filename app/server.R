@@ -22,8 +22,8 @@ server = function (input, output, session) {
   source("./back/src/exploration/globals_exploration.R")
   source("./back/src/exploration/vizualizations.R")
   source("./back/src/machine_learning/globals_machine_learning.R")
+  source("./back/src/machine_learning/chaid.R")
   source("./back/src/machine_learning/models.R")
-  source("./back/src/machine_learning/processing_machine_learning.R")
 
 
   options(shiny.maxRequestSize=251*1024^2) #maximum size for uploading
@@ -141,7 +141,7 @@ server = function (input, output, session) {
       if (list_reavalues$error ==FALSE){
         if(input$input_typedata_choice=="Fichier intégré"){
           file_name=input$input_intdataset
-          file_path=paste("./data/datasets",file_name,sep="/")
+          file_path=paste("./back/src/data/datasets",file_name,sep="/")
           header=TRUE
           dec="."
           skip=input$input_fileSkip_integrate
@@ -205,12 +205,19 @@ server = function (input, output, session) {
               "Le dataset chargé ne contient pas de lignes !",
               easyClose = TRUE
             ))
-
-
+          }
+          if(ncol(personnalFile) == 0){
+            showModal(modalDialog(
+              title = "Erreur",
+              "Le dataset chargé ne contient pas de colonnes !",
+              easyClose = TRUE
+            ))
           }
 
 
-          if (list_reavalues$error_csv == FALSE && (nrow(personnalFile) > 0)){
+          if (list_reavalues$error_csv == FALSE &&
+            (nrow(personnalFile) > 0) && (ncol(personnalFile) > 0)){
+
             list_reavalues$table_all=personnalFile
             list_reavalues$table=data.frame(list_reavalues$table_all)
             list_reavalues$col_categories_all=get_categories(list_reavalues$table_all)
@@ -308,11 +315,17 @@ server = function (input, output, session) {
             output$input_exp_type=renderUI({
               selectInput("input_exp_type",
                           label="Choisissez le type d'exploration",
-                          choices=c("Univariée","Bivariée"),
+                          choices=c("Univariée","Bivariée","Multivariée"),
                           selected = "Univariée"
               )
             })
-
+            output$input_multi_select_viz=renderUI({
+              selectInput("input_multi_select_viz",
+                             label="Selectionner votre visualisation",
+                             choices=c("Matrice de corrélations"),
+                             multiple=TRUE,
+                             selected ="Matrice de corrélations")
+            })
             output$input_uni_select_var=renderUI({
               selectInput("input_uni_select_var",
                           label="Selectionner votre variable",
@@ -327,6 +340,8 @@ server = function (input, output, session) {
                              options = list(maxItems = 2),
                              selected =list_reavalues$col_names[1])
             })
+
+
             #-------------------------------------------------------------------------------------------#
             output$input_model_type=renderUI({
               selectInput("input_model_type",
@@ -484,7 +499,6 @@ server = function (input, output, session) {
 
           }
           list_reavalues$error_format=TRUE
-          print("lzlzlzl")
           output$input_sheet_value_xlsx=renderUI({
           })
           output$input_sheet_name_xlsx=renderUI({
@@ -829,38 +843,43 @@ server = function (input, output, session) {
 
 
   observeEvent(input$input_valid_dummy, {
-    if (input$input_var_dummy == TRUE){
-      list_reavalues$modify_type=list_reavalues$modify_type+1
-      list_reavalues$modify_features=list_reavalues$modify_features+1
-      col_select=input$input_varchoice
-      category=get_type_col_by_name(list_reavalues$type_table,col_select)
-      if (category == "qualitative nominale" || category == "qualitative ordinale"){
-        process=process_dummy(list_reavalues$table,list_reavalues$table_all,list_reavalues$type_table,
-                                               list_reavalues$col_categories_all,col_select)
-        list_reavalues$table=process[["table"]]
-        list_reavalues$table_all=process[["table_all"]]
-        list_reavalues$type_table=process[["type_table"]]
-        list_reavalues$col_categories=list_reavalues$type_table[["category"]]
-        names(list_reavalues$col_categories)=list_reavalues$type_table[["variable"]]
-        list_reavalues$col_categories_all=process[["col_categories_all"]]
-      }
-      selected=input$input_varschoice
-      col_names =list_reavalues$type_table["variable"]
-      output$input_varschoice=renderUI({
-        selectInput("input_varschoice",
-                    label="Choisissez les variables à étudier",
-                    choices=c(c("#Toutes"),col_names),
-                    selected = selected ,
-                    multiple = TRUE)
-      })
-      output$input_varchoice=renderUI({
-        selectInput("input_varchoice",
-                    label="Choisissez une variable",
-                    choices=col_names,
-                    selected = input$input_varchoice)
-      })
+    if(!identical(input$input_varchoice,NULL)){
+      selected_var=input$input_varchoice
+      regex_pattern = paste("^", input$input_varchoice, "_",sep="")[1]
+      if (input$input_var_dummy == TRUE &&  sum(grepl(regex_pattern, colnames(list_reavalues$table_all))) == 0){
+        list_reavalues$modify_type=list_reavalues$modify_type+1
+        list_reavalues$modify_features=list_reavalues$modify_features+1
+        col_select=input$input_varchoice
+        category=get_type_col_by_name(list_reavalues$type_table,col_select)
+        if (category == "qualitative nominale" || category == "qualitative ordinale"){
+          process=process_dummy(list_reavalues$table,list_reavalues$table_all,list_reavalues$type_table,
+                                list_reavalues$col_categories_all,col_select)
+          list_reavalues$table=process[["table"]]
+          list_reavalues$table_all=process[["table_all"]]
+          list_reavalues$type_table=process[["type_table"]]
+          list_reavalues$col_categories=list_reavalues$type_table[["category"]]
+          names(list_reavalues$col_categories)=list_reavalues$type_table[["variable"]]
+          list_reavalues$col_categories_all=process[["col_categories_all"]]
+        }
+        col_names=list_reavalues$type_table[["variable"]]
+        choices_all=c(c("#Toutes"),colnames(list_reavalues$table_all))
+        output$input_varschoice=renderUI({
+          selectInput("input_varschoice",
+                      label="Choisissez les variables à étudier",
+                      choices=choices_all,
+                      selected = col_names ,
+                      multiple = TRUE)
+        })
+        output$input_varchoice=renderUI({
+          selectInput("input_varchoice",
+                      label="Choisissez une variable",
+                      choices=col_names,
+                      selected = selected_var)
+        })
 
+      }
     }
+
   },ignoreNULL = TRUE,ignoreInit = TRUE)
 
 
@@ -1071,9 +1090,33 @@ server = function (input, output, session) {
         output$viz_input = renderUI({
           renderPlot(two_var_scatterplot(df_cols,type_cols = type_cols))
         })
+      }else if (viz_type == "Corrélations"){
+        table=two_var_correlations(df_cols,type_cols = c(type_col1,type_col2))
+        output$viz_input = renderUI({
+          renderTable(table,rownames = TRUE,colnames = TRUE)
+        })
       }
 
     }
+    if (input$input_exp_type == "Multivariée"){
+      df=list_reavalues$table
+      if (input$input_multi_select_viz == "Matrice de corrélations"){
+        table=multi_var_correlations(df,list_reavalues$col_categories)
+        output$viz_input = renderUI({
+          renderTable(table,rownames = TRUE,colnames = TRUE)
+        })
+      }
+
+
+
+
+
+
+
+
+
+    }
+
 
   },ignoreNULL = TRUE,ignoreInit = TRUE)
 
@@ -1163,21 +1206,25 @@ server = function (input, output, session) {
       p=input$input_prop_minclass
       method=ifelse(input$input_type_unbalanced == "Oversampling","over",ifelse(input$input_type_unbalanced == "Undersampling","under","both"))
       f=paste(input$input_model_outcome_bin,".",sep="~")
+      df_for_sample=list_reavalues$table_all
+      col_names=colnames(list_reavalues$table_all)
+      colnames(df_for_sample)=gsub("-","_",colnames(df_for_sample))
       if (list_reavalues$col_categories[input$input_model_outcome_bin] == "qualitative ordinale"){
         list_reavalues$table_all[input$input_model_outcome_bin]=factor(list_reavalues$table_all[[input$input_model_outcome_bin]],ordered=FALSE)
       }else{
       }
       if (method =="both"){
-        df_new=do.call(ovun.sample, list(as.formula(f), data=list_reavalues$table_all,method=method,p=p,seed=1,N=nrow(list_reavalues$table_all)))$data
+        df_new=do.call(ovun.sample, list(as.formula(f), data=df_for_sample,method=method,p=p,seed=1,N=nrow(df_for_sample)))$data
       }else if(method== "over"){
-        df_new=do.call(ovun.sample, list(as.formula(f), data=list_reavalues$table_all,method=method,p=p,seed=1))$data
+        df_new=do.call(ovun.sample, list(as.formula(f), data=df_for_sample,method=method,p=p,seed=1))$data
       }else if (method == "under"){
         minority_values=counts[index_min]
-        df_new=do.call(ovun.sample, list(as.formula(f), data=list_reavalues$table_all,method=method,N=minority_values/p,seed=1))$data
+        df_new=do.call(ovun.sample, list(as.formula(f), data=df_for_sample,method=method,N=minority_values/p,seed=1))$data
       }
 
       #------------------------------------------------------------------#
       list_reavalues$table_all=df_new
+      colnames(list_reavalues$table_all)=col_names
       if (list_reavalues$col_categories[input$input_model_outcome_bin] == "qualitative ordinale"){
         list_reavalues$table_all[input$input_model_outcome_bin]=factor(list_reavalues$table_all[[input$input_model_outcome_bin]],ordered=TRUE)
       }else{
@@ -1193,6 +1240,7 @@ server = function (input, output, session) {
       colnames(list_reavalues$type_table)[5]="Number of Missing Values"
       colnames(list_reavalues$type_table)[4]="Number of Modalities"
       rownames(list_reavalues$type_table) = NULL
+
       #------------------------------------------------------------------#
       counts_new=table(list_reavalues$table[[input$input_model_outcome_bin]])
       index_min_new=which.min(counts_new)
@@ -1248,7 +1296,7 @@ server = function (input, output, session) {
     if (input$input_model_type_bin == "Arbre de décision CHAID"){
       nbins=as.integer(input$input_model_bins_bin)
       model_name="Arbre de décision CHAID"
-      model_results=decision_tree_model(df[,c(outcome,features)],outcome,col_categories = col_categories,method="CHAID",prop=prop,nbins=nbins)
+      model_results=decision_tree_model(df[,c(outcome,features)], outcome, col_categories = col_categories, method= "CHAID", prop=prop, nbins=nbins)
       model=model_results[[1]]
       informations=display_informations(model,"Arbre de décision CHAID")
       true_labels_test=as.logical(unlist(model_results[2]))
@@ -1271,9 +1319,20 @@ server = function (input, output, session) {
     output$input_viz_model_bin = renderUI({
       renderPlot(plot_tree_model(model,model_name))
     })
-    output$input_viz_auc_bin = renderUI({
-      renderPlot(plot_roc_auc_curve(true_labels_test,pred_prob_test))
-    })
+    if (length(levels(as.factor(true_labels_test))) == 2){
+      output$input_viz_auc_bin = renderUI({
+        renderPlot(plot_roc_auc_curve(true_labels_test,pred_prob_test))
+      })
+    }else{
+      showModal(modalDialog(
+        title = "Information",
+        paste("Dans le jeu de données de test,",outcome," n'a pas exactement deux modalités:",mod_positive,"et Non",mod_positive),
+        easyClose = TRUE
+      ))
+      output$input_viz_auc_bin = renderUI({
+      })
+    }
+
 
     output$input_metrics_model_bin = renderUI({
       renderTable(metrics)

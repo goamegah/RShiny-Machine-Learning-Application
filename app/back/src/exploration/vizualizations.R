@@ -209,8 +209,9 @@ two_var_treemap_2_var = function(df_cols, type_cols,nbins=10){
   df_tree = df_cols %>%
     group_by(!!sym(var1)) %>% #transform var1,var2 string to symbol for dplyr library
     summarize(value = round((mean(!!sym(var2))),5))
+  df_tree[,"area"]=abs(df_tree["value"])
   return(
-    ggplot(df_tree, aes(area = !!sym("value"), fill = !!sym(var1), label = paste(!!sym(var1),"\n",!!sym("value")))) +
+    ggplot(df_tree, aes(area = !!sym("area"), fill = !!sym(var1), label = paste(!!sym(var1),"\n",!!sym("value")))) +
       geom_treemap() +
       geom_treemap_text(colour = "white",
                         place = "centre",
@@ -254,4 +255,35 @@ two_var_statistics= function(df_cols,type_cols,nbins=10){
     df_final
   )
 
+}
+
+
+
+two_var_correlations= function(df_cols,type_cols){
+  #df_cols[2] et df_cols[1] :quantitative
+
+  if((type_cols[1] == "quantitative continue" || type_cols[1] == "quantitative discrète") &&
+    (type_cols[2] == "quantitative continue" || type_cols[2] == "quantitative discrète")){
+    return(cor(df_cols,method="pearson",use="pairwise.complete.obs"))
+
+  }
+
+}
+
+multi_var_correlations= function(df,col_categories){
+  cols_quanti=rep(-1,length(col_categories))
+  for (i in seq_along(df)) {
+    cat = col_categories[i]
+    quanti_bool=(cat == "quantitative continue") || (cat == "quantitative discrète")
+    if (quanti_bool==TRUE){
+      cols_quanti[i]=i
+    }
+  }
+  df_quanti=df[,cols_quanti >= 0]
+  if ((nrow(df_quanti) == 0) || (col(df_quanti) == 0) ){
+    return(-1) #error
+  }else{
+    return(cor(df_quanti,method="pearson",use="pairwise.complete.obs"))
+
+  }
 }

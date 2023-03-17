@@ -196,6 +196,12 @@ ui = dashboardPage(
                                 ),
 
                ),
+               conditionalPanel(condition="input.input_exp_type == 'Multivariée'",
+                                fluidRow(
+                                  column(3,uiOutput("input_multi_select_viz"))
+                                )
+
+               ),
                fluidRow(
                  column(12,
                         uiOutput("input_valid_exp")

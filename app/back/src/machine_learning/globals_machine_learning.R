@@ -2,8 +2,12 @@ MODELES_BIN=c("Régression Logistique","Arbre de décision CART","Arbre de déci
 
 discretization_col=function(col_vec,nbins){
   col_vec=as.numeric(col_vec)
-  breaks = seq(min(col_vec), max(col_vec), length.out = nbins + 1)
-  col_vec = cut(col_vec, breaks = breaks,include.lowest = TRUE, right = FALSE)
+  if (min(col_vec)==max(col_vec)){
+    return(c(min(col_vec))) # case of min==max
+  }else{
+    breaks = seq(min(col_vec), max(col_vec), length.out = nbins + 1)
+    col_vec = cut(col_vec, breaks = breaks,include.lowest = TRUE, right = FALSE)
+  }
   return(col_vec)
 }
 

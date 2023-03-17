@@ -1,9 +1,9 @@
-source("/home/khaldi/Documents/EDA_ML_RShiny/JaGo/back/src/exploration/vizualizations.R")
-source("/home/khaldi/Documents/EDA_ML_RShiny/JaGo/back/src/dataset/globals_dataset.R")
-source("/home/khaldi/Documents/EDA_ML_RShiny/JaGo/back/src/dataset/processing.R")
-source("/home/khaldi/Documents/EDA_ML_RShiny/JaGo/back/src/exploration/globals_exploration.R")
-source("/home/khaldi/Documents/EDA_ML_RShiny/JaGo/back/src/machine_learning/globals_machine_learning.R")
-source("/home/khaldi/Documents/EDA_ML_RShiny/JaGo/back/src/machine_learning/models.R")
+source("./app/back/src/exploration/vizualizations.R")
+source("./app/back/src/dataset/globals_dataset.R")
+source("./app/back/src/dataset/processing.R")
+source("./app/back/src/exploration/globals_exploration.R")
+source("./app/back/src/machine_learning/globals_machine_learning.R")
+source("./app/back/src/machine_learning/models.R")
 
 
 library(ggplot2)
@@ -15,7 +15,7 @@ library(treemapify)
 #diag_barres_qualitative(dataframe["Headline"])
 
 
-dataframe1=read.csv("/home/khaldi/Documents/EDA_ML_RShiny/JaGo/data/datasets/loan_data.csv")
+dataframe1=read.csv("./app/data/datasets/loan_data.csv")
 col_categories=get_categories(dataframe1)
 dataframe1=process(dataframe1,col_categories = col_categories)
 type_col1=col_categories[match("borrower_score", names(col_categories))]
