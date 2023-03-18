@@ -1,7 +1,7 @@
 L'application est constituée de trois composantes:
     1) Un volet dépliant gauche pour pouvoir charger un fichier qui contient le dataset:
         - avec des options au chargement du fichier (séparateur de décimales, ignorer les premières lignes...)
-        - un bouton valider pour valider le chargement du fichier (limite maximale du ficher: 251 mo)
+        - un bouton valider pour valider le chargement du fichier (limite maximale du ficher: 25 mo)
 
     2) La partie centrale qui contient un tabpanel qui contient trois panels:
 

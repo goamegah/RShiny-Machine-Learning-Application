@@ -28,6 +28,7 @@ decision_tree_model = function(df, outcome,col_categories, method, prop=0.7, pru
     test_df = test_df %>%
       mutate_at(colnames(test_df), as.factor)
     tree_model = chaid(as.formula(paste(outcome, "~.")), data = train_df)
+
   } else if (method == "CART") {
     tree_model = rpart(as.formula(paste(outcome, "~.")), data = train_df,method = "class")
     if(prune) {

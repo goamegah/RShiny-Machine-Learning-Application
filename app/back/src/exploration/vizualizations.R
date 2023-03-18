@@ -1,6 +1,13 @@
 statistiques=function(df_col){
   col_name=colnames(df_col)[1]
   vec_col=df_col[,1]
+  var_=function(vec){
+    if(length(vec)==1){
+      return(0)
+    }else{
+      return(var(vec))
+    }
+  }
   return(tibble(
     Nom=col_name,
     Minimum = min(vec_col),
@@ -11,7 +18,7 @@ statistiques=function(df_col){
     Moyenne = mean(vec_col),
     Médiane = median(vec_col),
     "Écart-type" = sd(vec_col),
-    Variance = var(vec_col)
+    Variance = var_(vec_col)
   ))
 }
 
@@ -243,11 +250,18 @@ two_var_statistics= function(df_cols,type_cols,nbins=10){
     df_col1 = cut(df_cols[[var1]], breaks = breaks,include.lowest = TRUE, right = FALSE)
     df_cols[var1]=df_col1
   }
+  var_=function(vec){
+    if(length(vec)==1){
+      return(0)
+    }else{
+      return(var(vec))
+    }
+  }
   df_summarize = df_cols %>%
     group_by(!!sym(var1)) %>%
     summarize(
       mean_cond = mean(!!sym(var2)),
-      var_cond=var(!!sym(var2))
+      var_cond=var_(!!sym(var2))
     )
   df_final=df_summarize
   colnames(df_final)= c(var1,paste("Moyenne Conditionée de ",var2),paste("Variance Conditionée de ",var2))

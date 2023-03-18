@@ -15,9 +15,7 @@ library(pROC)
 library(ROSE)
 library(xlsx)
 library(readxl)
-library(rsconnect)
-library(partykit)
-library(devtools)
+
 #install_version("Formula", version = "1.2.5", repos = "http://cran.us.r-project.org") necessary for first deployment (shiny)
 
 

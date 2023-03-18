@@ -31,7 +31,6 @@ RUN Rscript -e 'install.packages("shiny",repos="http://cran.us.r-project.org")' 
     Rscript -e 'install.packages("ISLR",repos="http://cran.us.r-project.org")'  && \
     Rscript -e 'install.packages("rpart.plot",repos="http://cran.us.r-project.org")'  && \
     Rscript -e 'install.packages("party",repos="http://cran.us.r-project.org")'  && \
-    Rscript -e 'install.packages("CHAID", repos = "http://R-Forge.R-project.org", type = "source")'  && \
     Rscript -e 'install.packages("fastDummies",repos="http://cran.us.r-project.org")'  && \
     Rscript -e 'install.packages("pROC",repos="http://cran.us.r-project.org")'  && \
     Rscript -e 'install.packages("comprehenr",repos="http://cran.us.r-project.org")'  && \
@@ -41,4 +40,4 @@ RUN Rscript -e 'install.packages("shiny",repos="http://cran.us.r-project.org")' 
 
 USER app
 EXPOSE 3838
-CMD Rscript runApp.R
+CMD Rscript runApp.R 

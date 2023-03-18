@@ -26,7 +26,7 @@ server = function (input, output, session) {
   source("./back/src/machine_learning/models.R")
 
 
-  options(shiny.maxRequestSize=251*1024^2) #maximum size for uploading
+  options(shiny.maxRequestSize=25*1024^2) #maximum size for uploading
   # Déclaration de quelques variables réactives pour la synchronisation ***************
   list_reavalues=reactiveValues(
     table=NULL, #initialization
@@ -391,7 +391,7 @@ server = function (input, output, session) {
             }
 
             if (length(features) && length(qualitative_vars)){
-              modality_outcome=unique(list_reavalues$table[qualitative_vars[1]])
+              modality_outcome=unique(list_reavalues$table[[qualitative_vars[1]]])
               output$input_model_outcome_bin=renderUI({
                 selectInput("input_model_outcome_bin",
                             label="Variable à prédire",
@@ -895,6 +895,16 @@ server = function (input, output, session) {
                                          missing_values=sapply(list_reavalues$table,function(x){sum(is.na(x))}))
     colnames(list_reavalues$type_table)[5]="Number of Missing Values"
     colnames(list_reavalues$type_table)[4]="Number of Modalities"
+    qualitative_vars=list_reavalues$type_table %>%
+      filter(category == "qualitative ordinale" | category == "qualitative nominale" ) %>%
+      select(variable)
+    qualitative_vars=qualitative_vars[["variable"]]
+    output$input_model_outcome_bin=renderUI({
+      selectInput("input_model_outcome_bin",
+                  label="Variable à prédire",
+                  choices=qualitative_vars,
+                  selected =qualitative_vars[1])
+    })
   },ignoreNULL = TRUE,ignoreInit = TRUE)
 
   #------------------------------------------------------------------------------------------------------------#
@@ -1145,7 +1155,7 @@ server = function (input, output, session) {
         actionButton("input_valid_model_bin",
                      label="Valider les options")
       })
-      modality_outcome=unique(list_reavalues$table[input$input_model_outcome_bin])
+      modality_outcome=unique(list_reavalues$table[[input$input_model_outcome_bin]])
       output$input_model_poschoice_bin=renderUI({
         selectInput("input_model_poschoice_bin",
                     label="Choix de la modalité positive",
@@ -1316,6 +1326,7 @@ server = function (input, output, session) {
     metrics_confusion=calculate_metrics(true_labels_test,pred_prob_test>threshold)
     metrics=as.data.frame(metrics_confusion["metrics"])
     colnames(metrics)=c("Accuracy","Error Rate","Precision","Recall","F1-score")
+
     output$input_viz_model_bin = renderUI({
       renderPlot(plot_tree_model(model,model_name))
     })

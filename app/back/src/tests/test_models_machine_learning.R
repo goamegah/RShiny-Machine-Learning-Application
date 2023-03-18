@@ -624,7 +624,7 @@ library(fastDummies)
 
 outcome="status"
 mod_positive="Charged Off"
-df=read.csv("/home/khaldi/Documents/EDA_ML_RShiny/app/back/src/data/datasets/loan_data.csv")
+#df=read.csv("/home/khaldi/Documents/EDA_ML_RShiny/app/back/src/data/datasets/loan_data.csv")
 
 
 outcome_model=df[,outcome]==mod_positive
