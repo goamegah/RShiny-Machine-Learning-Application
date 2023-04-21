@@ -302,7 +302,8 @@ ui = dashboardPage(
 
                )
       ),
-
+      
+      # Onglet documentation
       tabPanel("Documentation",
                fluidRow(
                  uiOutput("input_doc")
@@ -312,7 +313,6 @@ ui = dashboardPage(
   ),
   # Nom de l'application - app
   title = "JaGo",
-  
 )
 
 
