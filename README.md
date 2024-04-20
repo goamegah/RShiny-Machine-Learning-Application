@@ -17,7 +17,7 @@
 Exploration de données et apprentissage de modèles supervisés avec l'application RShiny
 
 # Objectif
- Ce projet est la création d'une interface web pour analyser un dataset.
+ **Mlapp-RShiny** est une application permettant une exploration et l'application de modèle de Machine Learning sur les datasets intégrés. Vous avez également la possibilité d'interagir avec l'application au travers de vos propres datasets.
 
 # Les fonctionnalités
 - Preprocessing (imputation, normalisation...)
