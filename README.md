@@ -62,6 +62,6 @@ Please note that you need to have Docker installed on your machine to run the ap
 #### Notes 
 Un Dockerfile est présent pour ce projet mais l'application est déjà conteneurisée.
 
-Vous pouvez la retrouver sur : https://hub.docker.com/repository/docker/goamegah/edams-rshiny
+Vous pouvez la retrouver sur : https://hub.docker.com/repository/docker/jalalkhal/jago_img/
 
 Le port d'écoute est 3838, un mapping de port est nécessaire pour pouvoir y accéder depuis l'extérieur.
